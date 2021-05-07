@@ -2,7 +2,7 @@
 # 2021 (c) by **Mirko Lantieri**
 # All rights reserved.
 # 
-# train_awu.py : script responsable for the training and evaluation of the AlexNet CNN model based on weighted utility.
+# train_wu.py : script responsable for the training and evaluation of the AlexNet CNN model based on weighted utility.
 # The file contains the respective methods:
 # *train_model* : the method trains a CNN for a given number of epoch, learning rate etc. using the trainer from the dataset
 # *evaluate_model* : the method validates the implemented model
