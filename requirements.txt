@@ -1,0 +1,15 @@
+numpy
+matplotlib
+scikit-learn
+torch
+torchvision
+torchaudio
+pandas
+tensorboard
+nibabel
+pillow
+opencv-python
+tqdm
+pytest-shutil
+scikit-image
+git+https://github.com/ncullen93/torchsample
