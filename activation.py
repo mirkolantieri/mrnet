@@ -70,7 +70,7 @@ if __name__ == '__main__':
         raise Exception(f"method should be one of {list(methods.keys())}")
 
     #mrnet = torch.load(args.model)
-    model = models.resnet34(pretrained=True)
+    model = models.resnet18(pretrained=True)
     #model.load_state_dict(mrnet, strict=False)
     
     """
