@@ -69,9 +69,9 @@ if __name__ == '__main__':
     if args.method not in list(methods.keys()):
         raise Exception(f"method should be one of {list(methods.keys())}")
 
-    #mrnet = torch.load(args.model)
+    mrnet = torch.load(args.model)
     model = models.resnet18(pretrained=True)
-    #model.load_state_dict(mrnet, strict=False)
+    model.load_state_dict(mrnet, strict=False)
     
     """
     Choose the target layer you want to compute the visualization for.
