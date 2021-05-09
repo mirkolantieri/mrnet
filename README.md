@@ -8,8 +8,8 @@
 # Table of contents
 1. [Introduction](#introduction)
 2. [Dataset](#dataset)
-    1. [25th most difficult cases](#difficult_cases)
-    2. [25th most highest disagreement cases](#disagreement)
+    1. [25 most difficult cases](#difficult_cases)
+    2. [25 most highest disagreement cases](#disagreement)
 3. [Dependencies](#dependencies)
 
 
@@ -17,7 +17,7 @@
 # 1. Introduction <a name="introduction"></a>
 In this project will be created a potential AI based on deep learning techniques: 
 the idea behind is to create a neural network and train it with cases from
-the MRNet dataset from Stanford in order to predict the cases of knee MRI images
+the MRNet dataset published from the Stanford ML Group in order to predict the cases of knee MRI images
 from patients having problems or hidden disease. The main interest is to 
 comprehend that if for a given MRI scan image, the prediction from the
 model is helpful for a radiologist in terms of utility instead of accuracy. We are interested in creating 2 AI models consisting of 
@@ -61,13 +61,28 @@ You can download the dataset from the above link
 
 <br>
 
-## 2.1 The 25th Most Difficult Cases <a name="difficult_cases"></a>
-This is 
+## 2.1 The 25 Most Difficult Cases <a name="difficult_cases"></a>
+Top radiologist from *Istituto Ortopedico Galeazzi di Milano* 
+are chosen as interpreters for the MRI diagnoses: their task was to evaluate a total number 420 cases from a score on-going
+from 1 (least complex) to 5 (most complex) points, where they would indicate the complexity
+of the case under evaluation. <br>
+This task was accomplished utilizing an online questionnaire 
+and the obtained results was stored using a `.csv` file.
+<br> Afterwards we calculated by mean and sorted the 25 most
+complex cases.
 
 <br>
 
-## 2.2 The 25th Most Highest Disagreement Cases <a name="disagreement"></a>
-The second paragraph text
+## 2.2 The 25 Most Highest Disagreement Cases <a name="disagreement"></a>
+The radiologist were also needed to rate the agreement of the case.
+This time the agreement rate was normalized in order to obtain 
+a probability result of [0,1]. Also in this task the selected
+cases are 25, especially those with the highest disagreement
+rate which is obviously sorted by mean.
+The script for the execution of the complexity and disagreement
+is located under `cases.py` while the `.csv` files are located
+into the `./cases/` folder. 
+
 
 ---
 
