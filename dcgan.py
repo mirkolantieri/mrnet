@@ -321,8 +321,5 @@ def main():
     plt.show()
 
 
-    for i in range(len(img_list)):
-        imsave(f'./gans/gan_{i}.jpg', img_list[i])
-
 if __name__ == "__main__":
     main()
