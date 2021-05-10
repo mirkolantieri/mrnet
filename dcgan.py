@@ -11,6 +11,7 @@
 
 from __future__ import print_function
 
+import os
 #%matplotlib inline
 import random
 
@@ -27,7 +28,7 @@ import torchvision.datasets as dset
 import torchvision.transforms as transforms
 import torchvision.utils as vutils
 from IPython.display import HTML
-from skimage.io import imsave
+from torchvision.utils import save_image
 
 # Set random seed for reproducibility
 manualSeed = 999
@@ -319,6 +320,14 @@ def main():
     plt.title("Fake Images")
     plt.imshow(np.transpose(img_list[-1],(1,2,0)))
     plt.show()
+
+
+    if not os.path.exists('./gans/'):
+        os.mkdir('./gans/')
+
+    for i in range(len(img_list)):
+        image = img_list[i]
+        save_image(image, f'./gans/gan_{i}.jpg')
 
 
 if __name__ == "__main__":
