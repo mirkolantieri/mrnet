@@ -4,8 +4,8 @@
 #
 # dcgan.py : script responsable for the creation of the Deep Convolutional Generative Adversarial Networks
 # The file contains the respective class:  
-# 
-# 
+# Discriminator
+# Generator
 
 # Importing libraries
 
