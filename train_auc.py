@@ -2,7 +2,7 @@
 # 2021 (c) by **Mirko Lantieri**
 # All rights reserved.
 # 
-# train_acc.py : script responsable for the training and evaluation of the AlexNet CNN model based on accuracy.
+# train_auc.py : script responsable for the training and evaluation of the AlexNet CNN model based on auc.
 # The file contains the respective methods:
 # *train_model* : the method trains a CNN for a given number of epoch, learning rate etc. using the trainer from the dataset
 # *evaluate_model* : the method validates the implemented model
@@ -235,10 +235,7 @@ def run(args):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
     # create the model
-    if args.model == "1":
-        mrnet = AlexNet()
-    elif args.model == "2":
-        mrnet = AlexNetCustom()
+    mrnet = AlexNet()
     
     mrnet = mrnet.to(device)
 
@@ -324,8 +321,6 @@ def run(args):
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--model', type=str, required=True,
-                        choices=['1', '2'])
     parser.add_argument('-t', '--task', type=str, required=True,
                         choices=['abnormal', 'acl', 'meniscus'])
     parser.add_argument('-p', '--plane', type=str, required=True,
