@@ -156,7 +156,7 @@ def evaluate_model(model, val_loader, epoch, num_epochs, writer, current_lr, dev
         try:
             wU = ut.weighted_utility(y_trues, y_preds)
         except:
-            wU = 0.5
+            wU = 0
 
         writer.add_scalar('Val/Loss', loss_value, epoch * len(val_loader) + i)
         writer.add_scalar('Val/WU', wU, epoch * len(val_loader) + i)
@@ -235,10 +235,7 @@ def run(args):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     
     # create the model
-    if args.model == "1":
-        mrnet = AlexNet()
-    elif args.model == "2":
-        mrnet = AlexNetCustom()
+    mrnet = AlexNet()
     
     mrnet = mrnet.to(device)
 
@@ -324,8 +321,6 @@ def run(args):
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--model', type=str, required=True,
-                        choices=['1', '2'])
     parser.add_argument('-t', '--task', type=str, required=True,
                         choices=['abnormal', 'acl', 'meniscus'])
     parser.add_argument('-p', '--plane', type=str, required=True,

@@ -107,7 +107,7 @@ for task in ['acl', 'meniscus', 'abnormal']:
         results['labels'] = labels
         results[plane] = predictions
     
-    # Assing the predictions to a numpy array with 3 channels 
+    # Transform the predictions to a numpy array with 3 channels 
     # (since we have 3 planes {axial, coronal, saggital})
     X = np.zeros((len(predictions), 3))
     X[:, 0] = results['axial']
@@ -120,8 +120,6 @@ for task in ['acl', 'meniscus', 'abnormal']:
     # Fit the model
     logreg = LogisticRegression(solver='lbfgs')
     logreg.fit(X, y)
-
-
 
     # Create a logistic regressor for the validation test
     results_val = {}
@@ -143,10 +141,10 @@ for task in ['acl', 'meniscus', 'abnormal']:
     # then save to a csv file
 
     y_pred = logreg.predict_proba(X_val)[:, 1]
-    y_class_preds = (y_pred > 0.5).astype(np.float32)
+    y_class_preds = pd.DataFrame((y_pred > 0.5).astype(np.float32))
     auc = metrics.roc_auc_score(y_val, y_pred)
     print(f'{task} AUC: {auc}')
-    np.savetxt(f'./{args.store}/{task}-prediction.csv', y_class_preds, delimiter=',') # predicts the final result considering each plane 
+    y_class_preds.to_csv(f'./{args.store}/{task}-prediction.csv', sep=',') # save the predicts of  the final result considering each plane 
 
     accuracy, sensitivity, specificity = ut.accuracy_sensitivity_specificity(y_val, y_class_preds)
     final_results_val[task] = [auc, accuracy, sensitivity, specificity]

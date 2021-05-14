@@ -19,6 +19,7 @@ import shutil
 import time
 from datetime import datetime
 
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
 import torch.nn as nn
@@ -30,7 +31,7 @@ from tqdm import tqdm
 
 import utils as ut
 from loader import MRDataset
-from model import AlexNet, AlexNetCustom
+from model import AlexNet
 
 torch.multiprocessing.set_sharing_strategy('file_system')
 
@@ -307,6 +308,15 @@ def run(args):
             print('Early stopping after {0} iterations without the decrease of the val loss'.
                   format(iteration_change_loss))
             break
+    # Plot the graph
+    plt.plot(train_auc,'-o')
+    plt.plot(val_auc,'-o')
+    plt.xlabel('epoch')
+    plt.ylabel('accuracy')
+    plt.legend(['Train','Valid'])
+    plt.title('Train vs Valid Accuracy')
+
+    plt.show()
 
     # save results to csv file
     with open(os.path.join(exp_dir, 'results', f'model_{args.prefix_name}_{args.task}_{args.plane}-results.csv'), 'w') as res_file:
