@@ -13,6 +13,7 @@ import csv
 import os
 import random
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import torch
@@ -84,14 +85,16 @@ def extract_predictions(task, plane, path_to_models, train=True):
     # While compiling without gradient, add each single item from the labels and prediction
     # to the above defined array lists 
     # and then return it 
-
+    i = 0
     with torch.no_grad():
         for image, label, _ in tqdm.tqdm(loader):
+            i +=1 
             image = image.to(device)
             logit = model(image)
             prediction = torch.sigmoid(logit)
             predictions.append(prediction[0].item())
             labels.append(label[0].item())
+            if i == 420: break
 
     return predictions, labels
 
@@ -145,6 +148,18 @@ for task in ['acl', 'meniscus', 'abnormal']:
     auc = metrics.roc_auc_score(y_val, y_pred)
     print(f'{task} AUC: {auc}')
     y_class_preds.to_csv(f'./{args.store}/{task}-prediction.csv', sep=',') # save the predicts of  the final result considering each plane 
+
+    
+
+    plt.figure(0).clf()
+
+    fpr, tpr, thresh = metrics.roc_curve(y_val, y_pred)
+    plt.plot(fpr,tpr,label=f"Task {task}, auc="+str(auc))
+    plt.title(f'ROC/AUROC graph')
+    plt.xlabel('fpr')
+    plt.ylabel('tpr')
+    plt.legend(loc=0)
+    plt.savefig(f'./{args.store}/roc-{task}.jpg')
 
     accuracy, sensitivity, specificity = ut.accuracy_sensitivity_specificity(y_val, y_class_preds)
     final_results_val[task] = [auc, accuracy, sensitivity, specificity]

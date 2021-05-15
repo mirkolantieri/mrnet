@@ -19,7 +19,10 @@ import random
 import cv2
 import numpy as np
 from numpy.core.fromnumeric import mean
+from numpy.lib.function_base import average
+from numpy.random import exponential
 import pandas as pd
+from scipy.ndimage.measurements import median
 import sklearn.metrics as metrics
 import torch
 from scipy.ndimage import shift
@@ -125,8 +128,12 @@ def weighted_utility(y_true, y_preds, gamma=1):
     """ 
     # Ignore the division with small numbers
     np.seterr(divide='ignore', invalid='ignore')
-
-    # Assing the precision recall and thresholds with sklearn metrics
+    
+    # Set array to 1D
+    y_true = np.array(y_true).reshape(-1, 1)
+    y_true = np.array(y_true).reshape(-1, 1)
+    
+    # Compute precision recall and thresholds with sklearn metrics
     precision, recall, thresholds = metrics.precision_recall_curve(y_true, y_preds)
 
     # Train a simple linear model to obtain the most important features
@@ -135,28 +142,33 @@ def weighted_utility(y_true, y_preds, gamma=1):
         y_true,
         y_preds,
         n_repeats=10,
-        random_state=42,
+        random_state=999,
     )
     # Create an empty array to hold the sigma(h|t)
     # and convert the thresholds to a numpy array
+    print('Thresholds ', thresholds)
+    tau = mean(thresholds)
+    print(tau)
     sigma = []
-    tau = np.mean(thresholds)
+    print((y_preds))
 
     for preds in y_preds:
         if preds <= tau and preds >= gamma * tau:
             if gamma == 1: pass
-            s = (preds - (gamma * tau)) / ((1 - gamma) * tau)
-            sigma.append(max(s))
+            s = (preds - (gamma * tau)) / float((1 - gamma) * tau)
+            sigma.append(s)
         if preds > tau: sigma.append(1)
         else: sigma.append(0)
-
+    
+    sigma = sum(sigma)
     pos = float(max(r.importances_mean))
-    wU = []
-    for i in sigma:
-        s = ((1 / pos) * sum(r.importances_mean * i)) - ((1 / pos) * sum(r.importances_mean * (tau / (1 - tau) * i)))
-        wU.append(s)
+    print("sigma ",sigma, " pos ", pos)
 
-    return np.mean(wU)
+    wU = ((1 / pos) * (r.importances_mean * sigma)) - ((1 / pos) * (r.importances_mean * (tau / (1 - tau) * sigma)))
+
+
+    print(wU)
+    return wU
 
 def preprocess_image(img: np.ndarray, mean=None, std=None) -> torch.Tensor:
     """ 
@@ -207,4 +219,4 @@ def show_cam_on_image(img: np.ndarray, mask: np.ndarray) -> np.ndarray:
     return np.uint8(255 * cam)
 
 
-weighted_utility(np.array([1, 0, 0, 1, 1, 1]).reshape(-1, 1), np.array([0.5, 1, 0.25, 1, 0.55, 1]).reshape(-1, 1), 0.7)
+weighted_utility(np.array([1, 0, 0, 1, 0, 1]), np.array([1, 0, 1, 1, 0, 0]), 0.2)

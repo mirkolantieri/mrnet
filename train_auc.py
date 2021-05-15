@@ -240,7 +240,7 @@ def run(args):
     
     mrnet = mrnet.to(device)
 
-    optimizer = optim.Adam(mrnet.parameters(), lr=args.lr, weight_decay=0.01)
+    optimizer = optim.SGD(mrnet.parameters(), lr=args.lr, weight_decay=0.01)
 
     if args.lr_scheduler == "plateau":
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
@@ -308,16 +308,7 @@ def run(args):
             print('Early stopping after {0} iterations without the decrease of the val loss'.
                   format(iteration_change_loss))
             break
-    # Plot the graph
-    plt.plot(train_auc,'-o')
-    plt.plot(val_auc,'-o')
-    plt.xlabel('epoch')
-    plt.ylabel('accuracy')
-    plt.legend(['Train','Valid'])
-    plt.title('Train vs Valid Accuracy')
-
-    plt.show()
-
+        
     # save results to csv file
     with open(os.path.join(exp_dir, 'results', f'model_{args.prefix_name}_{args.task}_{args.plane}-results.csv'), 'w') as res_file:
         fw = csv.writer(res_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
