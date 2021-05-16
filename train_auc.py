@@ -240,7 +240,7 @@ def run(args):
     
     mrnet = mrnet.to(device)
 
-    optimizer = optim.SGD(mrnet.parameters(), lr=args.lr, weight_decay=0.01)
+    optimizer = optim.Adagrad(mrnet.parameters(), lr=args.lr, weight_decay=0.01)
 
     if args.lr_scheduler == "plateau":
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(

@@ -79,7 +79,7 @@ def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, curre
         y_preds.append(probas[0].item())
 
         try:
-            acc = metrics.accuracy_score(y_trues, y_preds)
+            acc = metrics.average_precision_score(y_trues, y_preds)
         except:
             acc = 0.5
 
@@ -128,7 +128,7 @@ def evaluate_model(model, val_loader, epoch, num_epochs, writer, current_lr, dev
     model.eval()
 
      # Select the gpu or the cpu for the tensor compilation
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cuda' if torch.cudweighteda.is_available() else 'cpu')
 
 
     y_trues = []
@@ -155,7 +155,7 @@ def evaluate_model(model, val_loader, epoch, num_epochs, writer, current_lr, dev
         y_class_preds.append((probas[0] > 0.5).float().item())
 
         try:
-            acc = metrics.accuracy_score(y_trues, y_preds)
+            acc = metrics.average_precision_score(y_trues, y_preds)
         except:
             acc = 0.5
 
@@ -240,7 +240,7 @@ def run(args):
     
     mrnet = mrnet.to(device)
 
-    optimizer = optim.SGD(mrnet.parameters(), lr=args.lr, weight_decay=0.01)
+    optimizer = optim.Adagrad(mrnet.parameters(), lr=args.lr, weight_decay=0.01)
 
     if args.lr_scheduler == "plateau":
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(

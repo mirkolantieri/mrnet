@@ -80,7 +80,7 @@ def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, curre
         try:
             wU = ut.weighted_utility(y_trues, y_preds)
         except:
-            wU = 0.5
+            wU = 0.0
 
         writer.add_scalar('Train/Loss', loss_value, epoch * len(train_loader) + i)
         writer.add_scalar('Train/WU', wU, epoch * len(train_loader) + i)
@@ -156,7 +156,7 @@ def evaluate_model(model, val_loader, epoch, num_epochs, writer, current_lr, dev
         try:
             wU = ut.weighted_utility(y_trues, y_preds)
         except:
-            wU = 0
+            wU = 0.0
 
         writer.add_scalar('Val/Loss', loss_value, epoch * len(val_loader) + i)
         writer.add_scalar('Val/WU', wU, epoch * len(val_loader) + i)
@@ -239,7 +239,7 @@ def run(args):
     
     mrnet = mrnet.to(device)
 
-    optimizer = optim.Adam(mrnet.parameters(), lr=args.lr, weight_decay=0.01)
+    optimizer = optim.Adagrad(mrnet.parameters(), lr=args.lr, weight_decay=0.01)
 
     if args.lr_scheduler == "plateau":
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
