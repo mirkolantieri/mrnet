@@ -15,6 +15,7 @@
 # Importing libraries
 
 
+
 import random
 import cv2
 import numpy as np
@@ -144,30 +145,27 @@ def weighted_utility(y_true, y_preds, gamma=1):
         n_repeats=10,
         random_state=999,
     )
-    # Create an empty array to hold the sigma(h|t)
-    # and convert the thresholds to a numpy array
-    print('Thresholds ', thresholds)
+
+    # Calculate sigma(h|t)
+    # and convert the thresholds to mean for auto-bias
+    s = 0
     tau = mean(thresholds)
-    print(tau)
-    sigma = []
-    print((y_preds))
+    pos = float(max(r.importances_mean))
 
     for preds in y_preds:
-        if preds <= tau and preds >= gamma * tau:
-            if gamma == 1: pass
-            s = (preds - (gamma * tau)) / float((1 - gamma) * tau)
-            sigma.append(s)
-        if preds > tau: sigma.append(1)
-        else: sigma.append(0)
+        for r_i in r.importances:
+            if preds <= tau and preds >= gamma * tau:
+                if gamma == 1: pass
+                s = (preds - (gamma * tau)) / float((1 - gamma) * tau)
+            if preds > tau: s = 1
+            else: s = 0
+            A = sum(r_i * s)
+            B = sum(r_i * (tau / 1 - tau) * s)
     
-    sigma = sum(sigma)
-    pos = float(max(r.importances_mean))
-    print("sigma ",sigma, " pos ", pos)
+    # Calculate the weighted utility
+    wU = pow(pos, -1) * A - pow(pos, -1) * B
+    
 
-    wU = ((1 / pos) * (r.importances_mean * sigma)) - ((1 / pos) * (r.importances_mean * (tau / (1 - tau) * sigma)))
-
-
-    print(wU)
     return wU
 
 def preprocess_image(img: np.ndarray, mean=None, std=None) -> torch.Tensor:
@@ -219,4 +217,4 @@ def show_cam_on_image(img: np.ndarray, mask: np.ndarray) -> np.ndarray:
     return np.uint8(255 * cam)
 
 
-weighted_utility(np.array([1, 0, 0, 1, 0, 1]), np.array([1, 0, 1, 1, 0, 0]), 0.2)
+weighted_utility(np.array([1, 1, 1, 1, 0, 1]), np.array([1, 0, 1, 1, 0, 0]), 1)
