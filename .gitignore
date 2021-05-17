@@ -2,5 +2,5 @@ data/
 experiments/
 __pycache__/
 .vscode/
-output/
+images/
 logs/
