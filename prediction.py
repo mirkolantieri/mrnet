@@ -82,6 +82,8 @@ def extract_predictions(task, plane, path_to_models, train=True):
     predictions = []
     labels = []
 
+    skip = { 280,97,77,394,259,115,314,123,100,279,150,30,309,381,231,94,146,230,325,339,258,137,193,298,207 }
+
     # While compiling without gradient, add each single item from the labels and prediction
     # to the above defined array lists 
     # and then return it 
@@ -95,6 +97,7 @@ def extract_predictions(task, plane, path_to_models, train=True):
             predictions.append(prediction[0].item())
             labels.append(label[0].item())
             if i == 420: break
+            if i in skip: pass
 
     return predictions, labels
 

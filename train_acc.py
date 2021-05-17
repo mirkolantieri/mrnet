@@ -55,7 +55,9 @@ def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, curre
 
     y_preds = []
     y_trues = []
+    y_class_preds = []
     losses = []
+
 
     for i, (image, label, weight) in enumerate(train_loader):
 
@@ -77,35 +79,43 @@ def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, curre
 
         y_trues.append(int(label[0]))
         y_preds.append(probas[0].item())
+        y_class_preds.append((probas[0] > 0.5).float().item())
+
 
         try:
-            acc = metrics.average_precision_score(y_trues, y_preds)
+            auc = metrics.roc_auc_score(y_trues, y_preds)
+            accuracy = metrics.accuracy_score(y_trues, y_class_preds)
         except:
-            acc = 0.5
+            auc = 0.5
+            accuracy = 0.5
 
         writer.add_scalar('Train/Loss', loss_value, epoch * len(train_loader) + i)
-        writer.add_scalar('Train/ACC', acc, epoch * len(train_loader) + i)
+        writer.add_scalar('Train/AUC', auc, epoch * len(train_loader) + i)
+        writer.add_scalar('Train/Accuracy', accuracy, epoch * len(train_loader) + i)
 
         if i == 420:
             break
 
         if (i % log_every == 0) & (i > 0):
-            print('''[Epoch: {0} / {1} |Single batch number : {2} / {3} ]| avg train loss {4} | train accuracy : {5} | lr : {6}'''.
+            print('''[Epoch: {0} / {1} |Single batch number : {2} / {3} ]| Average Train Loss {4} | Train AUC : {5} | LR : {6} | Train Accuracy : {7}'''.
                   format(
                       epoch + 1,
                       num_epochs,
                       i,
                       len(train_loader),
                       np.round(np.mean(losses), 4),
-                      np.round(acc, 4),
-                      current_lr
+                      np.round(auc, 4),
+                      current_lr,
+                      np.round(accuracy, 4)
+
                   )
                   )
 
-    writer.add_scalar('Train/ACC_epoch', acc, epoch)
+    writer.add_scalar('Train/AUC per epoch', auc, epoch)
+    writer.add_scalar('Train/Accuracy per epoch', accuracy, epoch)
 
     train_loss_epoch = np.round(np.mean(losses), 4)
-    train_acc_epoch = np.round(acc, 4)
+    train_acc_epoch = np.round(accuracy, 4)
 
     return train_loss_epoch, train_acc_epoch
 
@@ -128,7 +138,7 @@ def evaluate_model(model, val_loader, epoch, num_epochs, writer, current_lr, dev
     model.eval()
 
      # Select the gpu or the cpu for the tensor compilation
-    device = torch.device('cuda' if torch.cudweighteda.is_available() else 'cpu')
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
     y_trues = []
@@ -155,30 +165,35 @@ def evaluate_model(model, val_loader, epoch, num_epochs, writer, current_lr, dev
         y_class_preds.append((probas[0] > 0.5).float().item())
 
         try:
-            acc = metrics.average_precision_score(y_trues, y_preds)
+            auc = metrics.roc_auc_score(y_trues, y_preds)
+            accuracy = metrics.accuracy_score(y_trues, y_class_preds)
         except:
-            acc = 0.5
+            auc = 0.5
+            accuracy = 0.5
 
         writer.add_scalar('Val/Loss', loss_value, epoch * len(val_loader) + i)
-        writer.add_scalar('Val/ACC', acc, epoch * len(val_loader) + i)
+        writer.add_scalar('Val/AUC', auc, epoch * len(val_loader) + i)
+        writer.add_scalar('Val/Accuracy', accuracy, epoch * len(val_loader) + i)
 
         if (i % log_every == 0) & (i > 0):
-            print('''[Epoch: {0} / {1} |Single batch number : {2} / {3} ] | avg val loss {4} | val accuracy : {5} | lr : {6}'''.
+            print('''[Epoch: {0} / {1} |Single batch number : {2} / {3} ] | Average Validation Loss {4} | Validation AUC : {5} | LR : {6} | Validation Accuracy {7}'''.
                   format(
                       epoch + 1,
                       num_epochs,
                       i,
                       len(val_loader),
                       np.round(np.mean(losses), 4),
-                      np.round(acc, 4),
-                      current_lr
+                      np.round(auc, 4),
+                      current_lr,
+                      np.round(accuracy, 4)
                   )
                   )
 
-    writer.add_scalar('Val/ACC_epoch', acc, epoch)
+    writer.add_scalar('Val/AUC per epoch', auc, epoch)
+    writer.add_scalar('Val/Accuracy per epoch', accuracy, epoch)
 
     val_loss_epoch = np.round(np.mean(losses), 4)
-    val_acc_epoch = np.round(acc, 4)
+    val_acc_epoch = np.round(accuracy, 4)
 
     val_accuracy, val_sensitivity, val_specificity = ut.accuracy_sensitivity_specificity(y_trues, y_class_preds)
     val_accuracy = np.round(val_accuracy, 4)
@@ -240,7 +255,7 @@ def run(args):
     
     mrnet = mrnet.to(device)
 
-    optimizer = optim.Adagrad(mrnet.parameters(), lr=args.lr, weight_decay=0.01)
+    optimizer = optim.Adam(mrnet.parameters(), lr=args.lr, weight_decay=0.01)
 
     if args.lr_scheduler == "plateau":
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
@@ -269,7 +284,7 @@ def run(args):
         t_start = time.time()
         
         # train
-        train_loss, train_auc = train_model(mrnet, train_loader, epoch, num_epochs, optimizer, writer, current_lr, device, log_every)
+        train_loss, train_acc = train_model(mrnet, train_loader, epoch, num_epochs, optimizer, writer, current_lr, device, log_every)
         
         # evaluate
         val_loss, val_auc, val_accuracy, val_sensitivity, val_specificity = evaluate_model(mrnet, validation_loader, epoch, num_epochs, writer, current_lr, device)
@@ -282,8 +297,8 @@ def run(args):
         t_end = time.time()
         delta = t_end - t_start
 
-        print("train loss : {0} | train auc {1} | val loss {2} | val auc {3} | elapsed time {4} s".format(
-            train_loss, train_auc, val_loss, val_auc, delta))
+        print("Train Loss : {0} | Train Accuracy {1} | Val Loss {2} | Validation AUC {3} | Validation accuracy {4} | elapsed time {5} s".format(
+            train_loss, train_acc, val_loss, val_auc, val_accuracy , delta))
 
         iteration_change_loss += 1
         print('-' * 30)

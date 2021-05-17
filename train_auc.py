@@ -55,6 +55,7 @@ def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, curre
 
     y_preds = []
     y_trues = []
+    y_class_preds = []
     losses = []
 
     for i, (image, label, weight) in enumerate(train_loader):
@@ -77,20 +78,25 @@ def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, curre
 
         y_trues.append(int(label[0]))
         y_preds.append(probas[0].item())
+        y_class_preds.append((probas[0] > 0.5).float().item())
+
 
         try:
-            auc = metrics.roc_auc_score(y_trues, y_preds)
+            accuracy = metrics.precision_score(y_trues, y_preds)
+            auc = metrics.roc_auc_score(y_trues, y_class_preds)
         except:
             auc = 0.5
+            accuracy = 0.5
 
         writer.add_scalar('Train/Loss', loss_value, epoch * len(train_loader) + i)
         writer.add_scalar('Train/AUC', auc, epoch * len(train_loader) + i)
+        writer.add_scalar('Train/Accuracy', accuracy, epoch * len(train_loader) + i)
 
         if i == 420:
             break
 
         if (i % log_every == 0) & (i > 0):
-            print('''[Epoch: {0} / {1} |Single batch number : {2} / {3} ]| avg train loss {4} | train auc : {5} | lr : {6}'''.
+            print('''[Epoch: {0} / {1} |Single batch number : {2} / {3} ]| Average Train Loss {4} | Train AUC : {5} | LR : {6} | Accuracy {7}'''.
                   format(
                       epoch + 1,
                       num_epochs,
@@ -98,11 +104,13 @@ def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, curre
                       len(train_loader),
                       np.round(np.mean(losses), 4),
                       np.round(auc, 4),
-                      current_lr
+                      current_lr,
+                      np.round(accuracy, 4)
                   )
                   )
 
-    writer.add_scalar('Train/AUC_epoch', auc, epoch)
+    writer.add_scalar('Train/AUC per epoch', auc, epoch)
+    writer.add_scalar('Train/Accuracy per epoch', accuracy, epoch)
 
     train_loss_epoch = np.round(np.mean(losses), 4)
     train_auc_epoch = np.round(auc, 4)
@@ -151,19 +159,24 @@ def evaluate_model(model, val_loader, epoch, num_epochs, writer, current_lr, dev
         probas = torch.sigmoid(prediction)
 
         y_trues.append(int(label[0]))
+        
         y_preds.append(probas[0].item())
         y_class_preds.append((probas[0] > 0.5).float().item())
 
+
         try:
             auc = metrics.roc_auc_score(y_trues, y_preds)
+            accuracy = metrics.precision_score(y_trues, y_class_preds)
         except:
             auc = 0.5
-
+            accuracy = 0.5
+            
         writer.add_scalar('Val/Loss', loss_value, epoch * len(val_loader) + i)
         writer.add_scalar('Val/AUC', auc, epoch * len(val_loader) + i)
+        writer.add_scalar('Val/Accuracy', accuracy, epoch * len(val_loader) + i)
 
         if (i % log_every == 0) & (i > 0):
-            print('''[Epoch: {0} / {1} |Single batch number : {2} / {3} ] | avg val loss {4} | val auc : {5} | lr : {6}'''.
+            print('''[Epoch: {0} / {1} |Single batch number : {2} / {3} ] | Average Validation Loss {4} | Validation AUC : {5} | LR : {6} | Validation Accuracy {7}'''.
                   format(
                       epoch + 1,
                       num_epochs,
@@ -171,11 +184,13 @@ def evaluate_model(model, val_loader, epoch, num_epochs, writer, current_lr, dev
                       len(val_loader),
                       np.round(np.mean(losses), 4),
                       np.round(auc, 4),
-                      current_lr
+                      current_lr,
+                      np.round(accuracy, 4)
                   )
                   )
 
-    writer.add_scalar('Val/AUC_epoch', auc, epoch)
+    writer.add_scalar('Val/AUC per epoch', auc, epoch)
+    writer.add_scalar('Val/Accuracy per epoch', accuracy, epoch)
 
     val_loss_epoch = np.round(np.mean(losses), 4)
     val_auc_epoch = np.round(auc, 4)
@@ -240,7 +255,7 @@ def run(args):
     
     mrnet = mrnet.to(device)
 
-    optimizer = optim.Adagrad(mrnet.parameters(), lr=args.lr, weight_decay=0.01)
+    optimizer = optim.Adam(mrnet.parameters(), lr=args.lr, weight_decay=0.01)
 
     if args.lr_scheduler == "plateau":
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
@@ -282,7 +297,7 @@ def run(args):
         t_end = time.time()
         delta = t_end - t_start
 
-        print("train loss : {0} | train auc {1} | val loss {2} | val auc {3} | elapsed time {4} s".format(
+        print("Train Loss : {0} | Train AUC {1} | Validation Loss {2} | Validation AUC {3} | elapsed time {4} s".format(
             train_loss, train_auc, val_loss, val_auc, delta))
 
         iteration_change_loss += 1
