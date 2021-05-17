@@ -105,7 +105,7 @@ def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, curre
                       np.round(np.mean(losses), 4),
                       np.round(auc, 4),
                       current_lr,
-                      np.round(accuracy, 4)
+                      accuracy
                   )
                   )
 
@@ -185,7 +185,7 @@ def evaluate_model(model, val_loader, epoch, num_epochs, writer, current_lr, dev
                       np.round(np.mean(losses), 4),
                       np.round(auc, 4),
                       current_lr,
-                      np.round(accuracy, 4)
+                      accuracy
                   )
                   )
 
