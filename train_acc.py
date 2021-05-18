@@ -297,8 +297,7 @@ def run(args):
         t_end = time.time()
         delta = t_end - t_start
 
-        print("Train Loss : {0} | Train Accuracy {1} | Val Loss {2} | Validation AUC {3} | Validation accuracy {4} | elapsed time {5} s".format(
-            train_loss, train_acc, val_loss, val_auc, val_accuracy , delta))
+        print(f"Train Loss : {train_loss} | Train Accuracy {train_acc} | Val Loss {val_loss} | Validation AUC {val_auc} | Validation accuracy {val_accuracy} | elapsed time {delta} s")
 
         iteration_change_loss += 1
         print('-' * 30)
@@ -320,8 +319,7 @@ def run(args):
             iteration_change_loss = 0
 
         if iteration_change_loss == patience:
-            print('Early stopping after {0} iterations without the decrease of the val loss'.
-                  format(iteration_change_loss))
+            print(f'Early stopping after {iteration_change_loss} iterations without the decrease of the val loss')
             break
         
     # save results to csv file
