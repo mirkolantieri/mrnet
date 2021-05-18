@@ -82,8 +82,8 @@ def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, curre
 
 
         try:
+            auc = metrics.roc_auc_score(y_trues, y_preds)
             accuracy = metrics.precision_score(y_trues, y_preds)
-            auc = metrics.roc_auc_score(y_trues, y_class_preds)
         except:
             auc = 0.5
             accuracy = 0.5
