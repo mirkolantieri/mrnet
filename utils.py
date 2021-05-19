@@ -149,7 +149,7 @@ def weighted_utility(y_true, y_preds, gamma=1):
     )
     # Calculate sigma(h|t)
     # and convert the thresholds to mean for auto-bias
-    
+
     sigma = []
     t = mean(thresholds)
     pos = float(max(r.importances_mean))
@@ -164,10 +164,14 @@ def weighted_utility(y_true, y_preds, gamma=1):
 
     
     # Calculate the weighted utility
-    
+    wU = []
     for i in sigma:
         s = (pow(pos, -1) * sum(r.importances * i)) - (pow(pos, -1) * sum(r.importances * (t / (1 - t) ) * i))
-        wU = sum(s)
+        wU.append(s)
+
+    wU = np.array(wU).reshape(-1,1)
+    wU = (wU - min(wU))/(max(wU)-min(wU))
+
 
     return mean(wU)
 
