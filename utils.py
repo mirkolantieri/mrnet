@@ -17,15 +17,12 @@
 
 
 import random
+
 import cv2
 import numpy as np
-from numpy.core.fromnumeric import mean
-from numpy.lib.function_base import average
-from numpy.random import exponential
-import pandas as pd
-from scipy.ndimage.measurements import median
 import sklearn.metrics as metrics
 import torch
+from numpy.core.fromnumeric import mean
 from scipy.ndimage import shift
 from skimage.transform import rotate
 from sklearn.inspection import permutation_importance
@@ -127,46 +124,53 @@ def weighted_utility(y_true, y_preds, gamma=1):
             sigma(y_preds[i] | thresholds[i]) = 1 if y_preds[1] > thresholds[i] else 0
         )
     """ 
-    # Ignore the division with small numbers
     np.seterr(divide='ignore', invalid='ignore')
+    
     
     # Set array to 1D
     y_true = np.array(y_true).reshape(-1, 1)
-    y_true = np.array(y_true).reshape(-1, 1)
-    
+    y_preds = np.array(y_preds).reshape(-1, 1)
+
     # Compute precision recall and thresholds with sklearn metrics
     precision, recall, thresholds = metrics.precision_recall_curve(y_true, y_preds)
 
+    # Normalize the true and prediction array
+    y_true = (y_true - min(y_true))/(max(y_true)-min(y_true))
+    y_preds = (y_preds - min(y_preds))/(max(y_preds)-min(y_preds))
+   
     # Train a simple linear model to obtain the most important features
+
     r = permutation_importance(
         Ridge(alpha=1e-2).fit(y_true, y_preds),
         y_true,
         y_preds,
         n_repeats=10,
-        random_state=999,
+        random_state=42,
     )
-
     # Calculate sigma(h|t)
     # and convert the thresholds to mean for auto-bias
-    s = 0
-    tau = mean(thresholds)
+    
+    sigma = []
+    t = mean(thresholds)
     pos = float(max(r.importances_mean))
 
     for preds in y_preds:
-        for r_i in r.importances:
-            if preds <= tau and preds >= gamma * tau:
-                if gamma == 1: pass
-                s = (preds - (gamma * tau)) / float((1 - gamma) * tau)
-            if preds > tau: s = 1
-            else: s = 0
-            A = sum(r_i * s)
-            B = sum(r_i * (tau / 1 - tau) * s)
+        if preds <= t and preds >= gamma * t:
+            if gamma == 1: pass
+            s = (preds - (gamma * t)) / ((1 - gamma) * t)
+            sigma.append(max(s))
+        if preds > t: sigma.append(1)
+        else: sigma.append(0)
+
     
     # Calculate the weighted utility
-    wU = pow(pos, -1) * A - pow(pos, -1) * B
     
+    for i in sigma:
+        s = (pow(pos, -1) * sum(r.importances * i)) - (pow(pos, -1) * sum(r.importances * (t / (1 - t) ) * i))
+        wU = sum(s)
 
-    return wU
+    return mean(wU)
+
 
 def preprocess_image(img: np.ndarray, mean=None, std=None) -> torch.Tensor:
     """ 
@@ -217,4 +221,4 @@ def show_cam_on_image(img: np.ndarray, mask: np.ndarray) -> np.ndarray:
     return np.uint8(255 * cam)
 
 
-weighted_utility(np.array([1, 1, 1, 1, 0, 1]), np.array([1, 0, 1, 1, 0, 0]), 1)
+weighted_utility(np.array([1, 0, 0, 1, 1, 1]), np.array([0.5, 1, 0.25, 1, 0.55, 1]), 0.5)

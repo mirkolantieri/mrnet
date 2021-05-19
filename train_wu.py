@@ -80,7 +80,7 @@ def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, curre
         y_class_preds.append((probas[0] > 0.5).float().item())
 
         try:
-            wU = ut.weighted_utility(y_trues, y_preds)
+            wU = ut.weighted_utility(y_trues, y_preds, gamma=1)
             accuracy = metrics.accuracy_score(y_trues, y_class_preds)
         except:
             wU = 0.0
@@ -161,8 +161,8 @@ def evaluate_model(model, val_loader, epoch, num_epochs, writer, current_lr, dev
         y_class_preds.append((probas[0] > 0.5).float().item())
 
         try:
-            wU = ut.weighted_utility(y_trues, y_preds)
-            accuracy = metrics.precision_score(y_trues, y_class_preds)
+            wU = ut.weighted_utility(y_trues, y_preds, gamma=1)
+            accuracy = metrics.accuracy_score(y_trues, y_class_preds)
         except:
             wU = 0.0
             accuracy = 0.5
@@ -292,8 +292,8 @@ def run(args):
         t_end = time.time()
         delta = t_end - t_start
 
-        print("Train Loss : {0} | Train WU {1} | Validation Loss {2} | Validation WU {3} | elapsed time {4} s".format(
-            train_loss, train_wu, val_loss, val_wu, delta))
+        print("Train Loss : {0} | Train WU : {1} | Validation Loss : {2} | Validation WU : {3} | Accuracy : {4} |  elapsed time {5} s".format(
+            train_loss, train_wu, val_loss, val_wu, val_accuracy, delta))
 
         iteration_change_loss += 1
         print('-' * 30)
