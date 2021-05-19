@@ -169,6 +169,7 @@ def weighted_utility(y_true, y_preds, gamma=1):
         s = (pow(pos, -1) * sum(r.importances * i)) - (pow(pos, -1) * sum(r.importances * (t / (1 - t) ) * i))
         wU.append(s)
 
+    # Normalize the values of the weights
     wU = np.array(wU).reshape(-1,1)
     wU = (wU - min(wU))/(max(wU)-min(wU))
 
