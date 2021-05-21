@@ -40,6 +40,9 @@ torch.manual_seed(args.seed)
 np.random.seed(args.seed)
 torch.cuda.manual_seed_all(args.seed)
 
+complex = [ 280,97,77,394,259,115,314,123,100,279,150,30,309,381,231,94,146,230,325,339,258,137,193,298,207 ]
+
+
 def extract_predictions(task, plane, path_to_models, train=True):
     """ 
     `extract_predictions`: the method extracts the prediction from the pretrained models
@@ -82,7 +85,6 @@ def extract_predictions(task, plane, path_to_models, train=True):
     predictions = []
     labels = []
 
-    skip = { 280,97,77,394,259,115,314,123,100,279,150,30,309,381,231,94,146,230,325,339,258,137,193,298,207 }
 
     # While compiling without gradient, add each single item from the labels and prediction
     # to the above defined array lists 
@@ -97,8 +99,6 @@ def extract_predictions(task, plane, path_to_models, train=True):
             predictions.append(prediction[0].item())
             labels.append(label[0].item())
             if i == 420: break
-            if i in skip: pass
-
     return predictions, labels
 
 
@@ -147,32 +147,40 @@ for task in ['acl', 'meniscus', 'abnormal']:
     # then save to a csv file
 
     y_pred = logreg.predict_proba(X_val)[:, 1]
-    y_class_preds = pd.DataFrame((y_pred > 0.5).astype(np.float32))
-    auc = metrics.roc_auc_score(y_val, y_pred)
-    print(f'{task} AUC: {auc}')
-    y_class_preds.to_csv(f'./{args.store}/{task}-prediction.csv', sep=',') # save the predicts of  the final result considering each plane 
+    y_class_preds = (y_pred > 0.5).astype(np.float32)
 
-    
+    auc = metrics.roc_auc_score(y_val, y_class_preds)
+    wu = ut.weighted_utility(y_val, y_pred)
+
+    print(f'{task} AUC: {auc}')
+    print(f'{task} WU: {wu}')
 
     plt.figure(0).clf()
 
     fpr, tpr, thresh = metrics.roc_curve(y_val, y_pred)
     plt.plot(fpr,tpr,label=f"Task {task}, auc="+str(auc))
-    plt.title(f'ROC/AUROC graph')
+    plt.title(f'Complex case: ROC/AUROC graph')
     plt.xlabel('fpr')
     plt.ylabel('tpr')
     plt.legend(loc=0)
     plt.savefig(f'./{args.store}/roc-{task}.jpg')
 
     accuracy, sensitivity, specificity = ut.accuracy_sensitivity_specificity(y_val, y_class_preds)
-    final_results_val[task] = [auc, accuracy, sensitivity, specificity]
+    final_results_val[task] = [auc, accuracy, sensitivity, specificity, wu]
+
+
+    y_class_preds = pd.DataFrame(y_class_preds)
+    y_val = pd.DataFrame(y_val)
+    
+    #y_val.to_csv(f'./{args.store}/{task}-label.csv', sep=',') # save the true labels 
+    y_class_preds.to_csv(f'./{args.store}/{task}-prediction.csv', sep=',') # save the predicts of  the final result considering each plane 
 
 exp_dir = args.path.split('/')[:-2]
 
 # Save the obtained AUC results to a csv file 
 with open(os.path.join(*exp_dir, 'results', f'auc-results.csv'), 'w') as res_file:
     fw = csv.writer(res_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-    fw.writerow(['Tear', 'AUC', 'Accuracy', 'Sensitivity', 'Specifity'])
+    fw.writerow(['Tear', 'AUC', 'Accuracy', 'Sensitivity', 'Specifity', 'Weighted Utility'])
     for ck in final_results_val.keys():
         fw.writerow([f'{ck}'] + [str(val) for val in final_results_val[ck]])
 
