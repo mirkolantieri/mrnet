@@ -131,7 +131,7 @@ for task in ['acl', 'meniscus', 'abnormal']:
     results_val = {}
 
     for plane in ['axial', 'coronal', 'sagittal']:
-        predictions, labels = extract_predictions(task, plane, args.path, train=False)
+        predictions, labels = extract_predictions(task, plane, args.path, train=True)
         results_val['labels'] = labels
         results_val[plane] = predictions
 
@@ -155,16 +155,6 @@ for task in ['acl', 'meniscus', 'abnormal']:
     print(f'{task} AUC: {auc}')
     print(f'{task} WU: {wu}')
 
-    plt.figure(0).clf()
-
-    fpr, tpr, thresh = metrics.roc_curve(y_val, y_pred)
-    plt.plot(fpr,tpr,label=f"Task {task}, auc="+str(auc))
-    plt.title(f'Complex case: ROC/AUROC graph')
-    plt.xlabel('fpr')
-    plt.ylabel('tpr')
-    plt.legend(loc=0)
-    plt.savefig(f'./{args.store}/roc-{task}.jpg')
-
     accuracy, sensitivity, specificity = ut.accuracy_sensitivity_specificity(y_val, y_class_preds)
     final_results_val[task] = [auc, accuracy, sensitivity, specificity, wu]
 
@@ -172,13 +162,13 @@ for task in ['acl', 'meniscus', 'abnormal']:
     y_class_preds = pd.DataFrame(y_class_preds)
     y_val = pd.DataFrame(y_val)
     
-    #y_val.to_csv(f'./{args.store}/{task}-label.csv', sep=',') # save the true labels 
-    y_class_preds.to_csv(f'./{args.store}/{task}-prediction.csv', sep=',') # save the predicts of  the final result considering each plane 
+    y_val.to_csv(f'./{args.store}/complex-{task}-label.csv', sep=',') # save the true labels 
+    y_class_preds.to_csv(f'./{args.store}/complex-{task}-prediction.csv', sep=',') # save the predicts of  the final result considering each plane 
 
 exp_dir = args.path.split('/')[:-2]
 
 # Save the obtained AUC results to a csv file 
-with open(os.path.join(*exp_dir, 'results', f'auc-results.csv'), 'w') as res_file:
+with open(os.path.join(*exp_dir, 'results', f'complex-auc-results.csv'), 'w') as res_file:
     fw = csv.writer(res_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
     fw.writerow(['Tear', 'AUC', 'Accuracy', 'Sensitivity', 'Specifity', 'Weighted Utility'])
     for ck in final_results_val.keys():

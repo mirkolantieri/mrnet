@@ -37,7 +37,7 @@ def get_args():
                         help='Can be gradcam/gradcam++/scorecam/xgradcam/ablationcam')
     parser.add_argument('--case', type=str, default=False, help='number of the case')
     parser.add_argument('--plane', type=str, default=False, help='plane of the case')
-    parser.add_argument('--metric', type=str, default=1, help='choose the metric based on accuracy or weighted utility', choices=['1', '2'])
+    parser.add_argument('--metric', type=str, default=1, help='choose the metric based on accuracy - weighted utility - auc', choices=['1', '2', '3'])
     args = parser.parse_args()
     args.cuda = args.cuda and torch.cuda.is_available()
     if args.cuda:
@@ -69,9 +69,9 @@ if __name__ == '__main__':
     if args.method not in list(methods.keys()):
         raise Exception(f"method should be one of {list(methods.keys())}")
 
-    mrnet = torch.load(args.model)
+    #mrnet = torch.load(args.model)
     model = models.resnet18(pretrained=True)
-    model.load_state_dict(mrnet, strict=False)
+    #model.load_state_dict(mrnet, strict=False)
     
     """
     Choose the target layer you want to compute the visualization for.
@@ -122,6 +122,8 @@ if __name__ == '__main__':
 
     if args.metric == '2':
         cv2.imwrite(f'./activations/wu/case{args.case}{args.plane}_{args.method}.jpg', cam_image)
+    elif args.metric == '3':
+        cv2.imwrite(f'./activations/auc/case{args.case}{args.plane}_{args.method}.jpg', cam_image)
     else:
         cv2.imwrite(f'./activations/acc/case{args.case}{args.plane}_{args.method}.jpg', cam_image)
 
