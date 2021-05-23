@@ -16,19 +16,24 @@
 
 
 
+import os
 import random
 
 import cv2
 import numpy as np
+import pandas as pd
 import sklearn.metrics as metrics
 import torch
 from numpy.core.fromnumeric import mean
+from PIL import Image
+from tqdm import tqdm
 from scipy.ndimage import shift
 from skimage.transform import rotate
 from sklearn.inspection import permutation_importance
 from sklearn.linear_model import Ridge
 from sklearn.metrics import confusion_matrix
-from torchvision.transforms import Compose, Normalize, ToTensor
+from torchvision.transforms import Compose, Normalize, Resize, ToTensor
+import matplotlib.pyplot as plt
 
 
 def random_rotate(array, max_angle):
@@ -226,4 +231,90 @@ def show_cam_on_image(img: np.ndarray, mask: np.ndarray) -> np.ndarray:
     return np.uint8(255 * cam)
 
 
-weighted_utility(np.array([1, 0, 0, 1, 1, 1]), np.array([0.5, 1, 0.25, 1, 0.55, 1]), 0.5)
+def rescale_image(input_dir, output , input_dim=(224,224)):
+    os.makedirs(input_dir, exist_ok=False)
+    cnn_transform = Compose([Resize(input_dim)])
+
+    for img in os.listdir(input_dir):
+        image = Image.open(os.path.join(input_dir, img))
+        new_img = cnn_transform(image)
+
+        # copy the rotation information metadata from original image and save, else your transformed images may be rotated
+        exif = image.info['exif']
+        new_img.save(os.path.join(output, img), exif=exif)
+        
+        new_img.close()
+        image.close()
+
+
+def get_similarity_matrix(vectors):
+    """ Calculate for all vectors the cosine similarity to the other vectors.
+    
+        Note that this matrix may become huge, hence infefficient, with many thousands of images 
+    """
+    v = np.array(list(vectors.values())).T
+    sim = np.inner(v.T, v.T) / ((np.linalg.norm(v, axis=0).reshape(-1,1)) * ((np.linalg.norm(v, axis=0).reshape(-1,1)).T))
+    keys = list(vectors.keys())
+    matrix = pd.DataFrame(sim, columns = keys, index = keys)
+    
+    return matrix
+
+def top_entries(knum, sim_matrix):
+    """
+        `top_entries`: sort the values per item and store the top similar entries in another data structure
+    """
+
+    sim_name = pd.DataFrame(index = sim_matrix.index, columns = range(knum))
+    sim_value = pd.DataFrame(index = sim_matrix.index, columns = range(knum))
+
+    for j in tqdm(range(sim_matrix.shape[0])):
+        kSimilar = sim_matrix.iloc[j, :].sort_values(ascending = False).head(knum)
+        sim_name.iloc[j, :] = list(kSimilar.index)
+        sim_value.iloc[j, :] = kSimilar.values
+
+    return sim_name, sim_value
+
+def set_axes(axes, img, query = False, **kwargs):
+    value = kwargs.get("value", None)
+    if query:
+        axes.set_xlabel("Query Image\n{0}".format(img), fontsize = 12)
+    else:
+        axes.set_xlabel("Similarity value {1:1.3f}\n{0}".format( img,  value), fontsize = 12)
+    axes.set_xticks([])
+    axes.set_yticks([])
+
+def get_similar_images(image, sim_names, sim_val):
+    if image in set(sim_names.index):
+        imgs = list(sim_names.loc[image, :])
+        vals = list(sim_val.loc[image, :])
+        if image in imgs:
+            np.testing.assert_almost_equal(max(vals), 1, decimal = 5)
+            imgs.remove(image)
+            vals.remove(max(vals))
+        return imgs, vals
+    else:
+        print("'{}' Unknown image".format(image))
+
+
+def plot_similar_images(input_dir, image, cols, rows, sim_names, sim_val):
+    simImages, simValues = get_similar_images(image, sim_names, sim_val)
+    fig = plt.figure(figsize=(10, 20))
+    
+    # now plot the  most simliar images
+    for j in range(0, cols*rows):
+        ax = []
+        if j == 0:
+            img = Image.open(os.path.join(input_dir, image))
+            ax = fig.add_subplot(rows, cols, 1)
+            set_axes(ax, image, query = True)
+        else:
+            img = Image.open(os.path.join(input_dir, simImages[j-1]))
+            ax.append(fig.add_subplot(rows, cols, j+1))
+            set_axes(ax[-1], simImages[j-1], value = simValues[j-1])
+        img = img.convert('RGB')
+        plt.imshow(img)
+        img.close()
+    
+    plt.show()
+
+# weighted_utility(np.array([1, 0, 0, 1, 1, 1]), np.array([0.5, 1, 0.25, 1, 0.55, 1]), 0.5)
