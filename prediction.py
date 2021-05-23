@@ -22,8 +22,8 @@ from sklearn import metrics
 from sklearn.linear_model import LogisticRegression
 
 import utils as ut
-from loader import MRDataset
-from model import AlexNet
+from dataloader.loader import MRDataset
+from models.model import AlexNet
 
 torch.multiprocessing.set_sharing_strategy('file_system')
 

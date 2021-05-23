@@ -21,7 +21,7 @@ from cam.grad_cam_pp import GradCAMPlusPlus
 from cam.guided_backprop import GuidedBackpropReLUModel
 from cam.score_cam import ScoreCAM
 from cam.xgrad_cam import XGradCAM
-from model import AlexNet
+from models.model import AlexNet
 from utils import deprocess_image, preprocess_image, show_cam_on_image
 
 
