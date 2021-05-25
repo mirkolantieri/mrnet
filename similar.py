@@ -1,5 +1,5 @@
-import utils as ut
 import os
+import utils as ut
 from models.res_similar import SimilarRes18
 from PIL import Image
 from tqdm import tqdm
@@ -31,10 +31,11 @@ def find_similarity(input_dir, output):
         img.append(str(i))
     
     # Sort all images
-    img = img.sort()
+    #img.sort()
 
     # Find the similarity and save
     for i in img:
-        ut.plot_similar_images(input_dir, i, 10, 1, similarNames, similarValues)
-
+        ut.plot_similar_images(input_dir, i, 5, 1, similarNames, similarValues)
+    
+    
 find_similarity('./selected/', './rescaled/')

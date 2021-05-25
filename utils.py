@@ -297,7 +297,7 @@ def get_similar_images(image, sim_names, sim_val):
 
 def plot_similar_images(input_dir, image, cols, rows, sim_names, sim_val):
     simImages, simValues = get_similar_images(image, sim_names, sim_val)
-    fig = plt.figure(figsize=(100, 200))
+    fig = plt.figure(figsize=(10, 20))
     
     # now plot the  most simliar images
     for j in range(0, cols*rows):
@@ -314,6 +314,6 @@ def plot_similar_images(input_dir, image, cols, rows, sim_names, sim_val):
         plt.imshow(img)
         img.close()
     
-    plt.savefig(f'./similarity/similar/img_{img}.jpg')
+    plt.savefig(f'./similarity/img_{image}.jpg')
 
 # weighted_utility(np.array([1, 0, 0, 1, 1, 1]), np.array([0.5, 1, 0.25, 1, 0.55, 1]), 0.5)
