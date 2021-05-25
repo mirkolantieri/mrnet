@@ -37,6 +37,4 @@ def find_similarity(input_dir, output):
     for i in img:
         ut.plot_similar_images(input_dir, i, 10, 1, similarNames, similarValues)
 
-
-if __name__ == '__main__':
-    find_similarity('./selected/', './rescaled/')
+find_similarity('./selected/', './rescaled/')
