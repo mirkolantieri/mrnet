@@ -23,7 +23,7 @@ def find_similarity(input_dir, output):
     # Create the similarity matrix
 
     similarityMatrix = ut.get_similarity_matrix(allVectors)
-    similarNames, similarValues = ut.top_entries(10, similarityMatrix)
+    similarNames, similarValues = ut.top_entries(5, similarityMatrix)
 
     # Append the image to the array list
     img = []
@@ -31,8 +31,8 @@ def find_similarity(input_dir, output):
         img.append(str(i))
     
     # Sort all images
-    #img.sort()
-
+    img.sort()
+    
     # Find the similarity and save
     for i in img:
         ut.plot_similar_images(input_dir, i, 5, 1, similarNames, similarValues)

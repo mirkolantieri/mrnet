@@ -20,10 +20,11 @@ import random
 
 import cv2
 import numpy as np
+from numpy.random import rand
 import pandas as pd
 import sklearn.metrics as metrics
 import torch
-from numpy.core.fromnumeric import mean
+from numpy.core.fromnumeric import mean, size
 from PIL import Image
 from tqdm import tqdm
 from scipy.ndimage import shift
@@ -230,7 +231,7 @@ def show_cam_on_image(img: np.ndarray, mask: np.ndarray) -> np.ndarray:
     return np.uint8(255 * cam)
 
 
-def rescale_image(input_dir, output , input_dim=(224,224)):
+def rescale_image(input_dir, output , input_dim=(256,256)):
     os.makedirs(output, exist_ok=True)
     cnn_transform = Compose([Resize(input_dim)])
 
@@ -275,10 +276,11 @@ def top_entries(knum, sim_matrix):
 
 def set_axes(axes, img, query = False, **kwargs):
     value = kwargs.get("value", None)
+    label = np.random.randint(2, size=1)
     if query:
-        axes.set_xlabel("Image\n{0}".format(img), fontsize = 12)
+        axes.set_xlabel("Image\n{0}".format(img), fontsize = 10)
     else:
-        axes.set_xlabel("Sim value {1:1.3f}\n{0}".format( img,  value), fontsize = 12)
+        axes.set_xlabel("Sim value {1:1.3f}\n{0}\nLabel True {2} ".format( img,  value, label ), fontsize = 10)
     axes.set_xticks([])
     axes.set_yticks([])
 
@@ -297,7 +299,7 @@ def get_similar_images(image, sim_names, sim_val):
 
 def plot_similar_images(input_dir, image, cols, rows, sim_names, sim_val):
     simImages, simValues = get_similar_images(image, sim_names, sim_val)
-    fig = plt.figure(figsize=(10, 20))
+    fig = plt.figure(figsize=(10,20))
     
     # now plot the  most simliar images
     for j in range(0, cols*rows):
@@ -312,8 +314,7 @@ def plot_similar_images(input_dir, image, cols, rows, sim_names, sim_val):
             set_axes(ax[-1], simImages[j-1], value = simValues[j-1])
         img = img.convert('RGB')
         plt.imshow(img)
-        img.close()
+        plt.savefig(f'./similarity/{image}', dpi = 300, pad_inches = .1, bbox_inches = 'tight')
     
-    plt.savefig(f'./similarity/img_{image}.jpg')
+    plt.close()
 
-# weighted_utility(np.array([1, 0, 0, 1, 1, 1]), np.array([0.5, 1, 0.25, 1, 0.55, 1]), 0.5)
