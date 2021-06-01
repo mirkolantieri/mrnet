@@ -1,9 +1,6 @@
 numpy
 matplotlib
 scikit-learn
-torch
-torchvision
-torchaudio
 pandas
 tensorboard
 nibabel
@@ -12,4 +9,7 @@ opencv-python
 tqdm
 pytest-shutil
 scikit-image
+torch
+torchvision
+torchaudio
 git+https://github.com/ncullen93/torchsample
