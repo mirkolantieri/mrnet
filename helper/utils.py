@@ -250,7 +250,7 @@ def rescale_image(input_dir, output , input_dim=(256,256)):
 def get_similarity_matrix(vectors):
     """ Calculate for all vectors the cosine similarity to the other vectors.
     
-        Note that this matrix may become huge, hence infefficient, with many thousands of images 
+        Note that this matrix may become huge, hence inefficient, with many thousands of images 
     """
     v = np.array(list(vectors.values())).T
     sim = np.inner(v.T, v.T) / ((np.linalg.norm(v, axis=0).reshape(-1,1)) * ((np.linalg.norm(v, axis=0).reshape(-1,1)).T))
@@ -314,7 +314,7 @@ def plot_similar_images(input_dir, image, cols, rows, sim_names, sim_val):
             set_axes(ax[-1], simImages[j-1], value = simValues[j-1])
         img = img.convert('RGB')
         plt.imshow(img)
-        plt.savefig(f'./similarity/{image}', dpi = 300, pad_inches = .1, bbox_inches = 'tight')
+        plt.savefig(f'./similarity/similar/{image}', dpi = 300, pad_inches = .1, bbox_inches = 'tight')
     
     plt.close()
 

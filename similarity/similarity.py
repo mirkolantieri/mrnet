@@ -1,5 +1,5 @@
 import os
-import utils as ut
+import helper.utils as ut
 from models.res_similar import SimilarRes18
 from PIL import Image
 from tqdm import tqdm

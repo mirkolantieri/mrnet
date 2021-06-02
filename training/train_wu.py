@@ -28,7 +28,7 @@ from sklearn import metrics
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
 
-import utils as ut
+import helper.utils as ut
 from dataloader.loader import MRDataset
 from models.model import AlexNet
 
