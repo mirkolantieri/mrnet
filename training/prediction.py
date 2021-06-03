@@ -21,7 +21,7 @@ import tqdm
 from sklearn import metrics
 from sklearn.linear_model import LogisticRegression
 
-import helper.utils as ut
+from helper import utils as ut
 from dataloader.loader import MRDataset
 from models.model import AlexNet
 
