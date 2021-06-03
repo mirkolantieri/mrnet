@@ -19,7 +19,7 @@ from torchsample.transforms import (Compose, RandomAffine, RandomFlip,
                                     RandomRotate, RandomTranslate, ToTensor)
 from torchvision import transforms
 
-import utils as ut
+import helper.utils as ut
 
 
 class MRDataset(data.Dataset):
