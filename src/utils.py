@@ -36,6 +36,7 @@ from torchvision.transforms import Compose, Normalize, Resize, ToTensor
 import matplotlib.pyplot as plt
 
 
+
 def random_rotate(array, max_angle):
     """
     `random_rotate`: rotates the image frame from different angles
@@ -314,7 +315,7 @@ def plot_similar_images(input_dir, image, cols, rows, sim_names, sim_val):
             set_axes(ax[-1], simImages[j-1], value = simValues[j-1])
         img = img.convert('RGB')
         plt.imshow(img)
-        plt.savefig(f'./similarity/similar/{image}', dpi = 300, pad_inches = .1, bbox_inches = 'tight')
+        plt.savefig(f'./images/similar/{image}', dpi = 300, pad_inches = .1, bbox_inches = 'tight')
     
     plt.close()
 
