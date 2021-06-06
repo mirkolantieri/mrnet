@@ -1,6 +1,7 @@
 data/
 experiments/
 __pycache__/
+.vscode
 .vscode/
 logs/
 rescaled/
