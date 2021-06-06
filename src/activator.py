@@ -2,7 +2,7 @@
 # 2021 (c) by **Mirko Lantieri**
 # All rights reserved.
 #
-# activation.py : script responsable for the activation maps
+# activator.py : script responsable for the activation maps
 # The file contains the respective methods:
 # *get_args* : runs the script when parsing the arguments via terminal
 
@@ -15,14 +15,14 @@ import numpy as np
 import torch
 import os
 from torchvision import models
-from cam.ablation_cam import AblationCAM
-from cam.grad_cam import GradCAM
-from cam.grad_cam_pp import GradCAMPlusPlus
-from cam.guided_backprop import GuidedBackpropReLUModel
-from cam.score_cam import ScoreCAM
-from cam.xgrad_cam import XGradCAM
-from models.model import AlexNet
-from helper.utils import deprocess_image, preprocess_image, show_cam_on_image
+from src.cam.ablation_cam import AblationCAM
+from src.cam.grad_cam import GradCAM
+from src.cam.grad_cam_pp import GradCAMPlusPlus
+from src.cam.guided_backprop import GuidedBackpropReLUModel
+from src.cam.score_cam import ScoreCAM
+from src.cam.xgrad_cam import XGradCAM
+from src.models.model import AlexNet
+from src.helper.utils import deprocess_image, preprocess_image, show_cam_on_image
 
 
 def get_args():
@@ -121,12 +121,12 @@ if __name__ == '__main__':
     gb = deprocess_image(gb)
 
     if args.metric == '2':
-        cv2.imwrite(f'./activations/wu/case{args.case}{args.plane}_{args.method}.jpg', cam_image)
+        cv2.imwrite(f'./images/activations/wu/case{args.case}{args.plane}_{args.method}.jpg', cam_image)
     elif args.metric == '3':
-        cv2.imwrite(f'./activations/auc/case{args.case}{args.plane}_{args.method}.jpg', cam_image)
+        cv2.imwrite(f'./images/activations/auc/case{args.case}{args.plane}_{args.method}.jpg', cam_image)
     else:
-        cv2.imwrite(f'./activations/acc/case{args.case}{args.plane}_{args.method}.jpg', cam_image)
+        cv2.imwrite(f'./images/activations/acc/case{args.case}{args.plane}_{args.method}.jpg', cam_image)
 
     # remove the comment to activate also the guided backpropagation generated from the model
-    #cv2.imwrite(f'./activations/case{args.case}{args.plane}_{args.method}_gb.jpg', gb)
-    #cv2.imwrite(f'./activations/case{args.case}{args.plane}_{args.method}_cam_gb.jpg', cam_gb)
+    #cv2.imwrite(f'./images/activations/case{args.case}{args.plane}_{args.method}_gb.jpg', gb)
+    #cv2.imwrite(f'./images/activations/case{args.case}{args.plane}_{args.method}_cam_gb.jpg', cam_gb)

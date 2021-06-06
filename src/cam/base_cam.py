@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import torch
-from cam.activations_and_gradients import ActivationsAndGradients
+from src.cam.activations_and_gradients import ActivationsAndGradients
 
 class BaseCAM:
     def __init__(self, model, target_layer, use_cuda=False):

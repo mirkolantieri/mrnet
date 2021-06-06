@@ -29,9 +29,9 @@ from sklearn import metrics
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
 
-from helper import utils as ut
-from dataloader.loader import MRDataset
-from models.model import AlexNet
+from src.helper import utils as ut
+from src.dataloader.loader import MRDataset
+from src.models.model import AlexNet
 
 torch.multiprocessing.set_sharing_strategy('file_system')
 

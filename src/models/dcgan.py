@@ -38,7 +38,7 @@ random.seed(manualSeed)
 torch.manual_seed(manualSeed)
 
 # Root directory for dataset
-dataroot = "./images/"
+dataroot = "./images/dataimage/"
 # Number of workers for dataloader
 workers = 2
 # Batch size during training
