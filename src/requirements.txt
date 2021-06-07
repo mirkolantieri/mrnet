@@ -14,3 +14,4 @@ torchvision
 torchaudio
 ipython
 git+https://github.com/ncullen93/torchsample
+torch-tb-profiler
