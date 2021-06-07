@@ -101,76 +101,77 @@ def extract_predictions(task, plane, path_to_models, train=True):
             if i == 420: break
     return predictions, labels
 
+def predict_complex():
 
-final_results_val = {}
+    final_results_val = {}
 
-for task in ['acl', 'meniscus', 'abnormal']:
-    results = {}
+    for task in ['acl', 'meniscus', 'abnormal']:
+        results = {}
 
-    # Train a logistic regressor model
-    for plane in ['axial', 'coronal', 'sagittal']:
-        predictions, labels = extract_predictions(task, plane, args.path)
-        results['labels'] = labels
-        results[plane] = predictions
-    
-    # Transform the predictions to a numpy array with 3 channels 
-    # (since we have 3 planes {axial, coronal, saggital})
-    X = np.zeros((len(predictions), 3))
-    X[:, 0] = results['axial']
-    X[:, 1] = results['coronal']
-    X[:, 2] = results['sagittal']
+        # Train a logistic regressor model
+        for plane in ['axial', 'coronal', 'sagittal']:
+            predictions, labels = extract_predictions(task, plane, args.path, train=True)
+            results['labels'] = labels
+            results[plane] = predictions
+        
+        # Transform the predictions to a numpy array with 3 channels 
+        # (since we have 3 planes {axial, coronal, saggital})
+        X = np.zeros((len(predictions), 3))
+        X[:, 0] = results['axial']
+        X[:, 1] = results['coronal']
+        X[:, 2] = results['sagittal']
 
-    # Create an numpy array having the labels
-    y = np.array(labels)
+        # Create an numpy array having the labels
+        y = np.array(labels)
 
-    # Fit the model
-    logreg = LogisticRegression(solver='lbfgs')
-    logreg.fit(X, y)
+        # Fit the model
+        logreg = LogisticRegression(solver='lbfgs')
+        logreg.fit(X, y)
 
-    # Create a logistic regressor for the validation test
-    results_val = {}
+        # Create a logistic regressor for the validation test
+        results_val = {}
 
-    for plane in ['axial', 'coronal', 'sagittal']:
-        predictions, labels = extract_predictions(task, plane, args.path, train=True)
-        results_val['labels'] = labels
-        results_val[plane] = predictions
+        for plane in ['axial', 'coronal', 'sagittal']:
+            predictions, labels = extract_predictions(task, plane, args.path, train=True)
+            results_val['labels'] = labels
+            results_val[plane] = predictions
 
-    X_val = np.zeros((len(predictions), 3))
-    X_val[:, 0] = results_val['axial']
-    X_val[:, 1] = results_val['coronal']
-    X_val[:, 2] = results_val['sagittal']
+        X_val = np.zeros((len(predictions), 3))
+        X_val[:, 0] = results_val['axial']
+        X_val[:, 1] = results_val['coronal']
+        X_val[:, 2] = results_val['sagittal']
 
-    y_val = np.array(labels)
+        y_val = np.array(labels)
 
-    # Predict the validation using the trained model, return
-    # the probabilities which are grater then 0.5 (rounding them to 1)
-    # then save to a csv file
+        # Predict the validation using the trained model, return
+        # the probabilities which are grater then 0.5 (rounding them to 1)
+        # then save to a csv file
 
-    y_pred = logreg.predict_proba(X_val)[:, 1]
-    y_class_preds = (y_pred > 0.5).astype(np.float32)
+        y_pred = logreg.predict_proba(X_val)[:, 1]
+        y_class_preds = (y_pred > 0.5).astype(np.float32)
 
-    auc = metrics.roc_auc_score(y_val, y_class_preds)
-    wu = ut.weighted_utility(y_val, y_pred)
+        auc = metrics.roc_auc_score(y_val, y_class_preds)
+        wu = ut.weighted_utility(y_val, y_pred)
 
-    print(f'{task} AUC: {auc}')
-    print(f'{task} WU: {wu}')
+        print(f'{task} AUC: {auc}')
+        print(f'{task} WU: {wu}')
 
-    accuracy, sensitivity, specificity = ut.accuracy_sensitivity_specificity(y_val, y_class_preds)
-    final_results_val[task] = [auc, accuracy, sensitivity, specificity, wu]
+        accuracy, sensitivity, specificity = ut.accuracy_sensitivity_specificity(y_val, y_class_preds)
+        final_results_val[task] = [auc, accuracy, sensitivity, specificity, wu]
 
 
-    y_class_preds = pd.DataFrame(y_class_preds)
-    y_val = pd.DataFrame(y_val)
-    
-    y_val.to_csv(f'./{args.store}/complex-{task}-label.csv', sep=',') # save the true labels 
-    y_class_preds.to_csv(f'./{args.store}/complex-{task}-prediction.csv', sep=',') # save the predicts of  the final result considering each plane 
+        y_class_preds = pd.DataFrame(y_class_preds)
+        y_val = pd.DataFrame(y_val)
+        
+        y_val.to_csv(f'./{args.store}/complex-{task}-label.csv', sep=',') # save the true labels 
+        y_class_preds.to_csv(f'./{args.store}/complex-{task}-prediction.csv', sep=',') # save the predicts of  the final result considering each plane 
 
-exp_dir = args.path.split('/')[:-2]
+    exp_dir = args.path.split('/')[:-2]
 
-# Save the obtained AUC results to a csv file 
-with open(os.path.join(*exp_dir, 'results', f'complex-auc-results.csv'), 'w') as res_file:
-    fw = csv.writer(res_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-    fw.writerow(['Tear', 'AUC', 'Accuracy', 'Sensitivity', 'Specifity', 'Weighted Utility'])
-    for ck in final_results_val.keys():
-        fw.writerow([f'{ck}'] + [str(val) for val in final_results_val[ck]])
+    # Save the obtained AUC results to a csv file 
+    with open(os.path.join(*exp_dir, 'results', f'complex-auc-results.csv'), 'w') as res_file:
+        fw = csv.writer(res_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        fw.writerow(['Tear', 'AUC', 'Accuracy', 'Sensitivity', 'Specifity', 'Weighted Utility'])
+        for ck in final_results_val.keys():
+            fw.writerow([f'{ck}'] + [str(val) for val in final_results_val[ck]])
 

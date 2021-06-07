@@ -237,10 +237,10 @@ def run(args):
     writer = SummaryWriter(logdir)
 
     # create training and validation set
-    train_dataset = MRDataset('./data/', args.task, args.plane, train=True)
+    train_dataset = MRDataset('./src/data/', args.task, args.plane, train=True)
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=1, shuffle=True, num_workers=2, drop_last=False)
 
-    validation_dataset = MRDataset('./data/', args.task, args.plane, train=False)
+    validation_dataset = MRDataset('./src/data/', args.task, args.plane, train=False)
     validation_loader = torch.utils.data.DataLoader(validation_dataset, batch_size=1, shuffle=-True, num_workers=2, drop_last=False)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
