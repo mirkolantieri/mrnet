@@ -289,21 +289,20 @@ def set_axes(axes, img, query=False, **kwargs):
 
 def get_similar_images(image, sim_names, sim_val):
     if image in set(sim_names.index):
-        imgs = list(sim_names.loc[image, :])
+        images = list(sim_names.loc[image, :])
         vals = list(sim_val.loc[image, :])
-        if image in imgs:
+        if image in images:
             np.testing.assert_almost_equal(max(vals), 1, decimal=5)
-            imgs.remove(image)
+            images.remove(image)
             vals.remove(max(vals))
-        return imgs, vals
+        return images, vals
     else:
         print("'{}' Unknown image".format(image))
 
 
 def plot_similar_images(input_dir, image, cols, rows, sim_names, sim_val):
     simImages, simValues = get_similar_images(image, sim_names, sim_val)
-    fig = plt.figure(figsize=(10, 20))
-    plt.title(f'Caso in analisi {image}')
+    fig = plt.figure(num=f'Caso in analisi {image}')
     # now plot the  most simliar images
     for j in range(0, cols * rows):
         ax = []
@@ -317,7 +316,7 @@ def plot_similar_images(input_dir, image, cols, rows, sim_names, sim_val):
             set_axes(ax[-1], simImages[j - 1], value=simValues[j - 1])
         img = img.convert('RGB')
         plt.imshow(img)
-        plt.savefig(f'./images/similar/{image}', dpi=300, pad_inches=.1, bbox_inches='tight')
+        plt.savefig(f'../images/similar/{image}', dpi=300, pad_inches=.3)
 
     plt.close()
 

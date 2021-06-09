@@ -18,7 +18,7 @@ class Resnet18(torch.nn.Module):
 
         self.numberFeatures = 512
         self.modelName = "resnet-18"
-        self.model, self.featureLayer = self.getFeatureLayer()
+        self.model, self.featureLayer = self.get_feature_layer()
         self.model = self.model.to(self.device)
         self.model.eval()
         self.toTensor = transforms.ToTensor()

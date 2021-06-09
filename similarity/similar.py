@@ -8,7 +8,7 @@ import time
 
 class Similar:
 
-    def __init__(self, model=None, input_dir='', output_dir='') -> None:
+    def __init__(self, model: Resnet18 = None, input_dir='', output_dir='') -> None:
         self.model = Resnet18() if model is None else model
         self.input_dir = input_dir
         self.output_dir = output_dir
@@ -37,7 +37,7 @@ class Similar:
         # Create the similarity matrix
         print("Creating the similarity matrix ...")
         matrix = ut.get_similarity_matrix(all_features)
-        label, score = ut.top_entries(5, matrix)
+        label, score = ut.top_entries(3, matrix)
 
         # Append the image to the array list
         img = []
@@ -51,7 +51,9 @@ class Similar:
         print("Saving images ...")
         beg = time.thread_time()
         for i in img:
-            ut.plot_similar_images(input_dir, i, 5, 1, label, score)
+            ut.plot_similar_images(input_dir, i, 3, 1, label, score)
         print(f"Completed in {time.thread_time - beg} s", )
 
-#find_similarity('./images/selected/', './images/rescaled/')
+
+if __name__ == '__main__':
+    Similar().find_similarity('../images/selected/', '../images/rescaled/')

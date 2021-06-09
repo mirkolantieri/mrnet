@@ -74,7 +74,7 @@ class Trainer:
             os.makedirs(os.path.join(self.experiment_directory, 'models'))
             os.makedirs(os.path.join(self.experiment_directory, 'logs'))
             os.makedirs(os.path.join(self.experiment_directory, 'results'))
-        self.log_root_path = (self.experiment_directory + f'/logs/{task}/{plane}') + datetime.now().\
+        self.log_root_path = (self.experiment_directory + f'/logs/{task}/{plane}') + datetime.now(). \
             strftime("%Y%m%d""-%H%M%S") + "/"
         self.flush_history = 0
 
@@ -126,13 +126,13 @@ class Trainer:
                 accuracy = metrics.balanced_accuracy_score(y_label, y_prediction)
                 if self.metric == 'accuracy':
                     auc = metrics.roc_auc_score(y_label, y_prediction)
-                    writer.add_scalar('Training Loss', loss_score, epoch*len(self.train_loader)+i)
+                    writer.add_scalar('Training Loss', loss_score, epoch * len(self.train_loader) + i)
                     writer.add_scalar('Training AUC', auc, epoch * len(self.train_loader) + i)
                     writer.add_scalar('Training Accuracy', accuracy, epoch * len(self.train_loader) + i)
 
                     if i == 420: break
                     if i % self.log_every == 0 and i > 0:
-                        print(f"Epoch {epoch+1} of {self.epochs}"
+                        print(f"Epoch {epoch + 1} of {self.epochs}"
                               f"\t Batch {i} of {len(self.train_loader)}"
                               f"\t Average training loss {np.round(np.mean(losses), 4)}"
                               f"\t Training AUC {np.round(auc, 4)}"
@@ -247,8 +247,10 @@ class Trainer:
                         val_loss = np.round(np.mean(losses), 4)
                         val_accuracy_epoch = np.round(accuracy, 4)
 
-                        val_accuracy, val_sensitivity, val_specificity = ut.accuracy_sensitivity_specificity(y_label, y_class_predictions)
-                        val_accuracy, val_sensitivity, val_specificity = np.round(val_accuracy, 4), np.round(val_sensitivity, 4), np.round(val_specificity)
+                        val_accuracy, val_sensitivity, val_specificity = ut.accuracy_sensitivity_specificity(y_label,
+                                                                                                             y_class_predictions)
+                        val_accuracy, val_sensitivity, val_specificity = np.round(val_accuracy, 4), np.round(
+                            val_sensitivity, 4), np.round(val_specificity)
 
                         return val_loss, val_accuracy_epoch, val_accuracy, val_sensitivity, val_specificity
                 if self.metric == 'auc':
@@ -307,6 +309,5 @@ class Trainer:
             except:
                 auc = 0.5
                 accuracy = 0.5
-
 
         return
