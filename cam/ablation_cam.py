@@ -1,7 +1,7 @@
-import cv2
 import numpy as np
 import torch
-from src.cam.base_cam import BaseCAM
+from cam.base_cam import BaseCAM
+
 
 class AblationLayer(torch.nn.Module):
     def __init__(self, layer, indices):
@@ -20,6 +20,7 @@ class AblationLayer(torch.nn.Module):
             output[i, self.indices[i], :, :] = output[i, self.indices[i], :, :] * 0
         return output
 
+
 def replace_layer_recursive(model, old_layer, new_layer):
     for name, layer in model._modules.items():
         if layer == old_layer:
@@ -28,6 +29,7 @@ def replace_layer_recursive(model, old_layer, new_layer):
         elif replace_layer_recursive(layer, old_layer, new_layer):
             return True
     return False
+
 
 class AblationCAM(BaseCAM):
     def __init__(self, model, target_layer, use_cuda=False):

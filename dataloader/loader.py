@@ -1,25 +1,19 @@
-# 
+#
 # 2021 (c) by **Mirko Lantieri**
 # All rights reserved.
-# 
-# loader.py : script responsable for loading the dataset path
-# The file contains the respective class: MRDataset(data.Dataset); inheritates an object from the Dataset parent class implemented by PyTorch.org
-
+#
+# loader.py : script responsible for loading the dataset path
+# The file contains the respective class: MRDataset(data.Dataset);
+# inherits an object from the Dataset parent class implemented by PyTorch.org
 # Importing libraries
-
-import os
 
 import numpy as np
 import pandas as pd
 import torch
-import torch.nn.functional as F
 import torch.utils.data as data
-import torchvision.transforms.functional as TF
-from torchsample.transforms import (Compose, RandomAffine, RandomFlip,
-                                    RandomRotate, RandomTranslate, ToTensor)
-from torchvision import transforms
 
-import src.helper.utils as ut
+
+import helper.utils as ut
 
 
 class MRDataset(data.Dataset):
@@ -72,6 +66,6 @@ class MRDataset(data.Dataset):
         array = (array - 58.09) / 49.73
         array = np.stack((array,)*3, axis=1)
 
-        array = torch.FloatTensor(array) # array size is now [S, 224, 224, 3]
+        array = torch.FloatTensor(array)  # array size is now [S, 224, 224, 3]
 
         return array, label, weight

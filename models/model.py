@@ -2,15 +2,14 @@
 # 2021 (c) by **Mirko Lantieri**
 # All rights reserved.
 #
-# model.py : script responsable for the creation of the AlexNet CNN model
-# The file contains the respective class: AlexNet(nn.Module) inheritates from the nn.Module parent class
+# model.py : script responsible for the creation of the AlexNet CNN model
+# The file contains the respective class: AlexNet(nn.Module) inherits from the nn.Module parent class
 #
 
 
 # Importing libraries
 import torch
 import torch.nn as nn
-from torch.nn import functional as F
 from torchvision import models
 
 torch.multiprocessing.set_sharing_strategy('file_system')
@@ -21,7 +20,7 @@ torch.multiprocessing.set_sharing_strategy('file_system')
 class AlexNet(nn.Module):
     """ class `AlexNet`: the implementation of the optimized AlexNet modern convolutional neural network
     to be used for the training and prediction. \\
-    Weights initilization with "Imagenet"
+    Weights initialization with "Imagenet"
     """
 
     def __init__(self):

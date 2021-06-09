@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
-import torch
-from src.cam.activations_and_gradients import ActivationsAndGradients
+from cam.activations_and_gradients import ActivationsAndGradients
+
 
 class BaseCAM:
     def __init__(self, model, target_layer, use_cuda=False):
@@ -41,7 +41,7 @@ class BaseCAM:
 
         activations = self.activations_and_grads.activations[-1].cpu().data.numpy()[0, :]
         grads = self.activations_and_grads.gradients[-1].cpu().data.numpy()[0, :]
-        
+
         weights = self.get_cam_weights(input_tensor, target_category, activations, grads)
         cam = np.zeros(activations.shape[1:], dtype=np.float32)
 

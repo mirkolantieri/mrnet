@@ -2,7 +2,7 @@
 # 2021 (c) by **Mirko Lantieri**
 # All rights reserved.
 # 
-# train_acc.py : script responsable for the training and evaluation of the AlexNet CNN model based on auc.
+# trainer.py : script responsable for the training and evaluation of the AlexNet CNN model based on auc.
 # The file contains the respective methods:
 # *train_model* : the method trains a CNN for a given number of epoch, learning rate etc. using the trainer from the dataset
 # *evaluate_model* : the method validates the implemented model
@@ -19,21 +19,19 @@ import shutil
 import time
 from datetime import datetime
 
-import matplotlib.pyplot as plt
 import numpy as np
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from sklearn import metrics
 from tensorboardX import SummaryWriter
-from tqdm import tqdm
 
-from helper import utils as ut
 from dataloader.loader import MRDataset
+from helper import utils as ut
 from models.model import AlexNet
 
 torch.multiprocessing.set_sharing_strategy('file_system')
+
 
 def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, current_lr, device, log_every=100):
     """  
@@ -45,10 +43,10 @@ def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, curre
         epoch: the current epoch under performing of the train
         num_epochs: the total number of epochs to perform the training
         optimizer: the hyperparameter tuning configuration for the optimization of the model
-        writer: the writer for the tensorboar
+        writer: the writer for the tensorboard
         current_lr: the current learning rate during the epoch
         device: the device to be used (gpu or cpu) for the model training
-        log_every: the ammount of logs to be processed
+        log_every: the amount of logs to be processed
     """
     model.train()
     model = model.to(device)
@@ -57,7 +55,6 @@ def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, curre
     y_trues = []
     y_class_preds = []
     losses = []
-
 
     for i, (image, label, weight) in enumerate(train_loader):
 
@@ -81,10 +78,9 @@ def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, curre
         y_preds.append(probas[0].item())
         y_class_preds.append((probas[0] > 0.5).float().item())
 
-
         try:
             auc = metrics.roc_auc_score(y_trues, y_preds)
-            accuracy = metrics.accuracy_score(y_trues, y_class_preds, normalize=True)
+            accuracy = metrics.accuracy_score(y_trues, y_class_preds)
         except:
             auc = 0.5
             accuracy = 0.5
@@ -97,19 +93,20 @@ def train_model(model, train_loader, epoch, num_epochs, optimizer, writer, curre
             break
 
         if (i % log_every == 0) & (i > 0):
-            print('''[Epoch: {0} / {1} |Single batch number : {2} / {3} ]| Average Train Loss {4} | Train AUC : {5} | LR : {6} | Train Accuracy : {7}'''.
-                  format(
-                      epoch + 1,
-                      num_epochs,
-                      i,
-                      len(train_loader),
-                      np.round(np.mean(losses), 4),
-                      np.round(auc, 4),
-                      current_lr,
-                      accuracy
+            print(
+                '''[Epoch: {0} / {1} |Single batch number : {2} / {3} ]| Average Train Loss {4} | Train AUC : {5} | LR : {6} | Train Accuracy : {7}'''.
+                    format(
+                    epoch + 1,
+                    num_epochs,
+                    i,
+                    len(train_loader),
+                    np.round(np.mean(losses), 4),
+                    np.round(auc, 4),
+                    current_lr,
+                    accuracy
 
-                  )
-                  )
+                )
+            )
 
     writer.add_scalar('Train/AUC per epoch', auc, epoch)
     writer.add_scalar('Train/Accuracy per epoch', accuracy, epoch)
@@ -137,9 +134,8 @@ def evaluate_model(model, val_loader, epoch, num_epochs, writer, current_lr, dev
 
     model.eval()
 
-     # Select the gpu or the cpu for the tensor compilation
+    # Select the gpu or the cpu for the tensor compilation
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
 
     y_trues = []
     y_preds = []
@@ -166,7 +162,7 @@ def evaluate_model(model, val_loader, epoch, num_epochs, writer, current_lr, dev
 
         try:
             auc = metrics.roc_auc_score(y_trues, y_preds)
-            accuracy = metrics.accuracy_score(y_trues, y_class_preds, normalize=True)
+            accuracy = metrics.accuracy_score(y_trues, y_class_preds)
         except:
             auc = 0.5
             accuracy = 0.5
@@ -176,18 +172,19 @@ def evaluate_model(model, val_loader, epoch, num_epochs, writer, current_lr, dev
         writer.add_scalar('Val/Accuracy', accuracy, epoch * len(val_loader) + i)
 
         if (i % log_every == 0) & (i > 0):
-            print('''[Epoch: {0} / {1} |Single batch number : {2} / {3} ] | Average Validation Loss {4} | Validation AUC : {5} | LR : {6} | Validation Accuracy {7}'''.
-                  format(
-                      epoch + 1,
-                      num_epochs,
-                      i,
-                      len(val_loader),
-                      np.round(np.mean(losses), 4),
-                      np.round(auc, 4),
-                      current_lr,
-                      accuracy
-                  )
-                  )
+            print(
+                '''[Epoch: {0} / {1} |Single batch number : {2} / {3} ] | Average Validation Loss {4} | Validation AUC : {5} | LR : {6} | Validation Accuracy {7}'''.
+                    format(
+                    epoch + 1,
+                    num_epochs,
+                    i,
+                    len(val_loader),
+                    np.round(np.mean(losses), 4),
+                    np.round(auc, 4),
+                    current_lr,
+                    accuracy
+                )
+            )
 
     writer.add_scalar('Val/AUC per epoch', auc, epoch)
     writer.add_scalar('Val/Accuracy per epoch', accuracy, epoch)
@@ -209,6 +206,7 @@ def get_lr(optimizer):
     """
     for param_group in optimizer.param_groups:
         return param_group['lr']
+
 
 def run(args):
     """ 
@@ -242,17 +240,19 @@ def run(args):
     writer = SummaryWriter(logdir)
 
     # create training and validation set
-    train_dataset = MRDataset('./src/data/', args.task, args.plane, train=True)
-    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=1, shuffle=True, num_workers=2, drop_last=False)
+    train_dataset = MRDataset('./data/', args.task, args.plane, train=True)
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=1, shuffle=True, num_workers=2,
+                                               drop_last=False)
 
-    validation_dataset = MRDataset('./src/data/', args.task, args.plane, train=False)
-    validation_loader = torch.utils.data.DataLoader(validation_dataset, batch_size=1, shuffle=-True, num_workers=2, drop_last=False)
+    validation_dataset = MRDataset('./data/', args.task, args.plane, train=False)
+    validation_loader = torch.utils.data.DataLoader(validation_dataset, batch_size=1, shuffle=-True, num_workers=2,
+                                                    drop_last=False)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    
+
     # create the model
     mrnet = AlexNet()
-    
+
     mrnet = mrnet.to(device)
 
     optimizer = optim.Adam(mrnet.parameters(), lr=args.lr, weight_decay=0.01)
@@ -282,12 +282,15 @@ def run(args):
         current_lr = get_lr(optimizer)
 
         t_start = time.time()
-        
+
         # train
-        train_loss, train_acc = train_model(mrnet, train_loader, epoch, num_epochs, optimizer, writer, current_lr, device, log_every)
-        
+        train_loss, train_acc = train_model(mrnet, train_loader, epoch, num_epochs, optimizer, writer, current_lr,
+                                            device, log_every)
+
         # evaluate
-        val_loss, val_auc, val_accuracy, val_sensitivity, val_specificity = evaluate_model(mrnet, validation_loader, epoch, num_epochs, writer, current_lr, device)
+        val_loss, val_auc, val_accuracy, val_sensitivity, val_specificity = evaluate_model(mrnet, validation_loader,
+                                                                                           epoch, num_epochs, writer,
+                                                                                           current_lr, device)
 
         if args.lr_scheduler == 'plateau':
             scheduler.step(val_loss)
@@ -297,7 +300,8 @@ def run(args):
         t_end = time.time()
         delta = t_end - t_start
 
-        print(f"Train Loss : {train_loss} | Train Accuracy {train_acc} | Val Loss {val_loss} | Validation AUC {val_auc} | Validation accuracy {val_accuracy} | elapsed time {delta} s")
+        print(
+            f"Train Loss : {train_loss} | Train Accuracy {train_acc} | Val Loss {val_loss} | Validation AUC {val_auc} | Validation accuracy {val_accuracy} | elapsed time {delta} s")
 
         iteration_change_loss += 1
         print('-' * 30)
@@ -321,9 +325,10 @@ def run(args):
         if iteration_change_loss == patience:
             print(f'Early stopping after {iteration_change_loss} iterations without the decrease of the val loss')
             break
-        
+
     # save results to csv file
-    with open(os.path.join(exp_dir, 'results', f'model_{args.prefix_name}_{args.task}_{args.plane}-results.csv'), 'w') as res_file:
+    with open(os.path.join(exp_dir, 'results', f'model_{args.prefix_name}_{args.task}_{args.plane}-results.csv'),
+              'w') as res_file:
         fw = csv.writer(res_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
         fw.writerow(['LOSS', 'AUC-best', 'Accuracy-best', 'Sensitivity-best', 'Specifity-best'])
         fw.writerow([best_val_loss, best_val_auc, best_val_accuracy, best_val_sensitivity, best_val_specificity])
