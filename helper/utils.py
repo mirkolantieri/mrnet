@@ -230,7 +230,7 @@ def show_cam_on_image(img: np.ndarray, mask: np.ndarray) -> np.ndarray:
     return np.uint8(255 * cam)
 
 
-def rescale_image(input_dir, output, input_dim=(256, 256)):
+def rescale_image(input_dir, output, input_dim=(250, 250)):
     os.makedirs(output, exist_ok=True)
     cnn_transform = Compose([Resize(input_dim)])
 
@@ -253,7 +253,7 @@ def get_similarity_matrix(vectors):
     """
     v = np.array(list(vectors.values())).T
     sim = np.inner(v.T, v.T) / (
-                (np.linalg.norm(v, axis=0).reshape(-1, 1)) * ((np.linalg.norm(v, axis=0).reshape(-1, 1)).T))
+            (np.linalg.norm(v, axis=0).reshape(-1, 1)) * ((np.linalg.norm(v, axis=0).reshape(-1, 1)).T))
     keys = list(vectors.keys())
     matrix = pd.DataFrame(sim, columns=keys, index=keys)
 
@@ -276,17 +276,6 @@ def top_entries(knum, sim_matrix):
     return sim_name, sim_value
 
 
-def set_axes(axes, img, query=False, **kwargs):
-    value = kwargs.get("value", None)
-    label = np.random.randint(2, size=1)
-    if query:
-        axes.set_xlabel("Query\n{0}".format(img), fontsize=8)
-    else:
-        axes.set_xlabel("Similarity: {1:1.3f}% \n {0} \n Label True {2} ".format(img, (100 * value), label), fontsize=8)
-    axes.set_xticks([])
-    axes.set_yticks([])
-
-
 def get_similar_images(image, sim_names, sim_val):
     if image in set(sim_names.index):
         images = list(sim_names.loc[image, :])
@@ -302,21 +291,41 @@ def get_similar_images(image, sim_names, sim_val):
 
 def plot_similar_images(input_dir, image, cols, rows, sim_names, sim_val):
     simImages, simValues = get_similar_images(image, sim_names, sim_val)
-    fig = plt.figure(num=f'Caso in analisi {image}')
+
+    # font
+    font = cv2.QT_FONT_NORMAL
+    # org
+    org = (10, 2550)
+    # fontScale
+    fontScale = 2
+    # White color in BGR
+    color = (255, 255, 255)
+    # Line thickness of 2 px
+    thickness = 3
+    # Using cv2.putText() method
+
+    zero_lab = ['case99axial.jpg', 'case99coronal.jpg', 'case99sagittal.jpg', 'case227axial.jpg',
+                'case227coronal.jpg', 'case227sagittal.jpg', 'case238axial.jpg', 'case238coronal.jpg',
+                'case238sagittal.jpg',
+                'case244axial.jpg', 'case244coronal.jpg', 'case244sagittal.jpg',
+                'case245axial.jpg', 'case245coronal.jpg', 'case245sagittal.jpg', ]
     # now plot the  most simliar images
     for j in range(0, cols * rows):
-        ax = []
         if j == 0:
-            img = Image.open(os.path.join(input_dir, image))
-            ax = fig.add_subplot(rows, cols, 1)
-            set_axes(ax, image, query=True)
+            img = cv2.imread((os.path.join(input_dir, image)))
+            img = cv2.putText(img, f'Caso in analisi {image}', org, font, fontScale, color, thickness, cv2.LINE_AA)
         else:
-            img = Image.open(os.path.join(input_dir, simImages[j - 1]))
-            ax.append(fig.add_subplot(rows, cols, j + 1))
-            set_axes(ax[-1], simImages[j - 1], value=simValues[j - 1])
-        img = img.convert('RGB')
-        plt.imshow(img)
-        plt.savefig(f'../images/similar/{image}', dpi=300, pad_inches=.3)
+            for i in os.listdir('../images/selected/'):
+                if i in zero_lab == os.path.join(input_dir, simImages[j - 1]):
+                    a = 0
+                else:
+                    a = 1
+            img1 = cv2.imread(os.path.join(input_dir, simImages[j - 1]))
+            img1 = cv2.putText(img1, f'Caso simile con {simImages[j - 1]}'
+                                     f'  {100 * np.round(simValues[j - 1], 2)}%', org, font, fontScale, color,
+                               thickness, cv2.LINE_AA)
+            img1 = cv2.putText(img1, f'Label true [ {a} ]', (10, 2490), font, fontScale, color,
+                               thickness, cv2.LINE_AA)
 
-    plt.close()
-
+            img = cv2.hconcat([img, img1])
+        cv2.imwrite(f'../images/similar/{image}', img)

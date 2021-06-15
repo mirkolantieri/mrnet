@@ -37,7 +37,7 @@ class Similar:
         # Create the similarity matrix
         print("Creating the similarity matrix ...")
         matrix = ut.get_similarity_matrix(all_features)
-        label, score = ut.top_entries(3, matrix)
+        label, score = ut.top_entries(4, matrix)
 
         # Append the image to the array list
         img = []
@@ -45,14 +45,14 @@ class Similar:
             img.append(str(i))
 
         # Sort all images
-        img.sort()
+        # img.sort()
 
         # Find the similarity and save
         print("Saving images ...")
         beg = time.thread_time()
         for i in img:
-            ut.plot_similar_images(input_dir, i, 3, 1, label, score)
-        print(f"Completed in {time.thread_time - beg} s", )
+            ut.plot_similar_images(input_dir, i, 4, 1, label, score)
+        print(f"Completed in {time.thread_time() - beg} s", )
 
 
 if __name__ == '__main__':
