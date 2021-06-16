@@ -35,8 +35,8 @@ torch.multiprocessing.set_sharing_strategy('file_system')
 class Trainer:
     """
     Class `Trainer`: the class is used to train the model and optimize it
-    by utilizing hyper-parameters tuning metrics (can be over accuracy, auroc or
-    the weighted utility)
+    by utilizing hyper-parameters tuning metrics (the metrics can be accuracy, auroc or
+    weighted utility based)
     """
 
     def __init__(self, metric: str = '', model: AlexNet = None, learning_rate: float = 1e-5, scheduler: str = 'step',
