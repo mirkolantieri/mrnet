@@ -12,11 +12,9 @@
 
 # Importing libraries
 
-import argparse
 import csv
 import os
 import random
-import shutil
 import time
 from datetime import datetime
 
@@ -24,12 +22,12 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
-from sklearn import metrics
-from tensorboardX import SummaryWriter
-
 from dataloader.loader import MRDataset
 from helper import utils as ut
 from models.model import AlexNet
+from numpy.random import seed
+from sklearn import metrics
+from tensorboardX import SummaryWriter, writer
 
 torch.multiprocessing.set_sharing_strategy('file_system')
 
@@ -45,9 +43,13 @@ class Trainer:
                  task: str = 'abnormal', plane: str = 'sagittal', epochs: int = 20) -> None:
         self.model = model
         self.metric = metric
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.task = task
+        self.plane = plane
+        self.device = torch.device(
+            'cuda' if torch.cuda.is_available() else 'cpu')
         self.lr = learning_rate
-        self.optimizer = optim.Adam(self.model.parameters(), lr=self.lr, weight_decay=1e-2)
+        self.optimizer = optim.Adam(
+            self.model.parameters(), lr=self.lr, weight_decay=1e-2)
         if scheduler == 'plateau':
             self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
                 self.optimizer, patience=5, factor=.3, threshold=1e-4, verbose=True
@@ -68,7 +70,8 @@ class Trainer:
         self.log_every = 50
         self.experiment_path = './experiments/'
         self.experiment_name = f'exp_{self.metric}'
-        self.experiment_directory = os.path.join(self.experiment_path, self.experiment_name)
+        self.experiment_directory = os.path.join(
+            self.experiment_path, self.experiment_name)
         if not os.path.exists(self.experiment_directory):
             os.makedirs(self.experiment_directory)
             os.makedirs(os.path.join(self.experiment_directory, 'models'))
@@ -76,6 +79,7 @@ class Trainer:
             os.makedirs(os.path.join(self.experiment_directory, 'results'))
         self.log_root_path = (self.experiment_directory + f'/logs/{task}/{plane}') + datetime.now(). \
             strftime("%Y%m%d""-%H%M%S") + "/"
+        os.makedirs(self.log_root_path)
         self.flush_history = 0
 
     @staticmethod
@@ -86,7 +90,7 @@ class Trainer:
         for param in self.optimizer.param_groups:
             return param['lr']
 
-    def train(self, writer: SummaryWriter, epoch: int) -> (np.ndarray, np.ndarray):
+    def train(self, writer: SummaryWriter, epoch: int):
         """
            `train`: train the model
 
@@ -108,7 +112,8 @@ class Trainer:
             weights = weights.to(self.device)
 
             prediction = self.model(image.float())
-            loss = F.binary_cross_entropy_with_logits(prediction, label, weight=weights)
+            loss = F.binary_cross_entropy_with_logits(
+                prediction, label, weight=weights)
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
@@ -123,14 +128,19 @@ class Trainer:
             y_class_predictions.append((score[0] > 0.5).float().item())
 
             try:
-                accuracy = metrics.balanced_accuracy_score(y_label, y_prediction)
+                accuracy = metrics.balanced_accuracy_score(
+                    y_label, y_prediction)
                 if self.metric == 'accuracy':
                     auc = metrics.roc_auc_score(y_label, y_prediction)
-                    writer.add_scalar('Training Loss', loss_score, epoch * len(self.train_loader) + i)
-                    writer.add_scalar('Training AUC', auc, epoch * len(self.train_loader) + i)
-                    writer.add_scalar('Training Accuracy', accuracy, epoch * len(self.train_loader) + i)
+                    writer.add_scalar('Training Loss', loss_score,
+                                      epoch * len(self.train_loader) + i)
+                    writer.add_scalar('Training AUC', auc,
+                                      epoch * len(self.train_loader) + i)
+                    writer.add_scalar(
+                        'Training Accuracy', accuracy, epoch * len(self.train_loader) + i)
 
-                    if i == 420: break
+                    if i == 420:
+                        break
                     if i % self.log_every == 0 and i > 0:
                         print(f"Epoch {epoch + 1} of {self.epochs}"
                               f"\t Batch {i} of {len(self.train_loader)}"
@@ -139,7 +149,8 @@ class Trainer:
                               f"\t Learning rate {Trainer.get_learning_rate()}"
                               f"\t Training accuracy {np.round(accuracy, 4)}")
                     writer.add_scalar('Training AUC per epoch', auc, epoch)
-                    writer.add_scalar('Training accuracy per epoch', accuracy, epoch)
+                    writer.add_scalar(
+                        'Training accuracy per epoch', accuracy, epoch)
 
                     training_loss = np.round(np.mean(losses), 4)
                     training_accuracy = np.round(accuracy, 4)
@@ -147,11 +158,15 @@ class Trainer:
                     return training_loss, training_accuracy
                 if self.metric == 'auc':
                     auc = metrics.auc(y_label, y_prediction)
-                    writer.add_scalar('Training Loss', loss_score, epoch * len(self.train_loader) + i)
-                    writer.add_scalar('Training AUC', auc, epoch * len(self.train_loader) + i)
-                    writer.add_scalar('Training Accuracy', accuracy, epoch * len(self.train_loader) + i)
+                    writer.add_scalar('Training Loss', loss_score,
+                                      epoch * len(self.train_loader) + i)
+                    writer.add_scalar('Training AUC', auc,
+                                      epoch * len(self.train_loader) + i)
+                    writer.add_scalar(
+                        'Training Accuracy', accuracy, epoch * len(self.train_loader) + i)
 
-                    if i == 420: break
+                    if i == 420:
+                        break
                     if i % self.log_every == 0 and i > 0:
                         print(f"Epoch {epoch + 1} of {self.epochs}"
                               f"\t Batch {i} of {len(self.train_loader)}"
@@ -160,7 +175,8 @@ class Trainer:
                               f"\t Learning rate {Trainer.get_learning_rate()}"
                               f"\t Training accuracy {np.round(accuracy, 4)}")
                     writer.add_scalar('Training AUC per epoch', auc, epoch)
-                    writer.add_scalar('Training accuracy per epoch', accuracy, epoch)
+                    writer.add_scalar(
+                        'Training accuracy per epoch', accuracy, epoch)
 
                     training_loss = np.round(np.mean(losses), 4)
                     training_auc = np.round(auc, 4)
@@ -169,11 +185,15 @@ class Trainer:
 
                 if self.metric == 'wu':
                     wu = ut.weighted_utility(y_label, y_prediction)
-                    writer.add_scalar('Training Loss', loss_score, epoch * len(self.train_loader) + i)
-                    writer.add_scalar('Training WU', wu, epoch * len(self.train_loader) + i)
-                    writer.add_scalar('Training Accuracy', accuracy, epoch * len(self.train_loader) + i)
+                    writer.add_scalar('Training Loss', loss_score,
+                                      epoch * len(self.train_loader) + i)
+                    writer.add_scalar('Training WU', wu,
+                                      epoch * len(self.train_loader) + i)
+                    writer.add_scalar(
+                        'Training Accuracy', accuracy, epoch * len(self.train_loader) + i)
 
-                    if i == 420: break
+                    if i == 420:
+                        break
                     if i % self.log_every == 0 and i > 0:
                         print(f"Epoch {epoch + 1} of {self.epochs}"
                               f"\t Batch {i} of {len(self.train_loader)}"
@@ -182,7 +202,8 @@ class Trainer:
                               f"\t Learning rate {Trainer.get_learning_rate()}"
                               f"\t Training accuracy {accuracy}")
                     writer.add_scalar('Training WU per epoch', wu, epoch)
-                    writer.add_scalar('Training accuracy per epoch', accuracy, epoch)
+                    writer.add_scalar(
+                        'Training accuracy per epoch', accuracy, epoch)
 
                     training_loss = np.round(np.mean(losses), 4)
                     training_wu = np.round(wu, 4)
@@ -193,7 +214,7 @@ class Trainer:
                 accuracy = 0.5
         return
 
-    def fit(self, writer: SummaryWriter, epoch: int) -> (np.ndarray, np.ndarray):
+    def fit(self, writer: SummaryWriter, epoch: int):
         """
             `train`: train the model
             args:
@@ -214,7 +235,8 @@ class Trainer:
             weights = weights.to(self.device)
 
             prediction = self.model.forward(image.float())
-            loss = F.binary_cross_entropy_with_logits(prediction, label, weight=weights)
+            loss = F.binary_cross_entropy_with_logits(
+                prediction, label, weight=weights)
 
             loss_score = loss.item()
             losses.append(loss_score)
@@ -226,12 +248,16 @@ class Trainer:
             y_class_predictions.append((score[0] > 0.5).float().item())
 
             try:
-                accuracy = metrics.balanced_accuracy_score(y_label, y_prediction)
+                accuracy = metrics.balanced_accuracy_score(
+                    y_label, y_prediction)
                 if self.metric == 'accuracy':
                     auc = metrics.roc_auc_score(y_label, y_prediction)
-                    writer.add_scalar('Validation Loss', loss_score, epoch * len(self.test_loader) + i)
-                    writer.add_scalar('Validation AUC', auc, epoch * len(self.test_loader) + i)
-                    writer.add_scalar('Validation Accuracy', accuracy, epoch * len(self.test_loader) + i)
+                    writer.add_scalar(
+                        'Validation Loss', loss_score, epoch * len(self.test_loader) + i)
+                    writer.add_scalar('Validation AUC', auc,
+                                      epoch * len(self.test_loader) + i)
+                    writer.add_scalar(
+                        'Validation Accuracy', accuracy, epoch * len(self.test_loader) + i)
 
                     if i % self.log_every == 0 and i > 0:
                         print(f"Epoch {epoch + 1} of {self.epochs}"
@@ -241,8 +267,10 @@ class Trainer:
                               f"\t Learning rate {Trainer.get_learning_rate()}"
                               f"\t Validation accuracy {np.round(accuracy, 4)}")
 
-                        writer.add_scalar('Validation AUC per epoch', auc, epoch)
-                        writer.add_scalar('Validation accuracy per epoch', accuracy, epoch)
+                        writer.add_scalar(
+                            'Validation AUC per epoch', auc, epoch)
+                        writer.add_scalar(
+                            'Validation accuracy per epoch', accuracy, epoch)
 
                         val_loss = np.round(np.mean(losses), 4)
                         val_accuracy_epoch = np.round(accuracy, 4)
@@ -255,9 +283,12 @@ class Trainer:
                         return val_loss, val_accuracy_epoch, val_accuracy, val_sensitivity, val_specificity
                 if self.metric == 'auc':
                     auc = metrics.auc(y_label, y_prediction)
-                    writer.add_scalar('Validation Loss', loss_score, epoch * len(self.test_loader) + i)
-                    writer.add_scalar('Validation AUC', auc, epoch * len(self.test_loader) + i)
-                    writer.add_scalar('Validation Accuracy', accuracy, epoch * len(self.test_loader) + i)
+                    writer.add_scalar(
+                        'Validation Loss', loss_score, epoch * len(self.test_loader) + i)
+                    writer.add_scalar('Validation AUC', auc,
+                                      epoch * len(self.test_loader) + i)
+                    writer.add_scalar(
+                        'Validation Accuracy', accuracy, epoch * len(self.test_loader) + i)
 
                     if i % self.log_every == 0 and i > 0:
                         print(f"Epoch {epoch + 1} of {self.epochs}"
@@ -267,8 +298,10 @@ class Trainer:
                               f"\t Learning rate {Trainer.get_learning_rate()}"
                               f"\t Validation accuracy {np.round(accuracy, 4)}")
 
-                        writer.add_scalar('Validation AUC per epoch', auc, epoch)
-                        writer.add_scalar('Validation accuracy per epoch', accuracy, epoch)
+                        writer.add_scalar(
+                            'Validation AUC per epoch', auc, epoch)
+                        writer.add_scalar(
+                            'Validation accuracy per epoch', accuracy, epoch)
 
                         val_loss = np.round(np.mean(losses), 4)
                         val_accuracy_epoch = np.round(accuracy, 4)
@@ -282,9 +315,12 @@ class Trainer:
 
                 if self.metric == 'wu':
                     wu = ut.weighted_utility(y_label, y_prediction)
-                    writer.add_scalar('Validation Loss', loss_score, epoch * len(self.test_loader) + i)
-                    writer.add_scalar('Validation WU', wu, epoch * len(self.test_loader) + i)
-                    writer.add_scalar('Validation Accuracy', accuracy, epoch * len(self.test_loader) + i)
+                    writer.add_scalar(
+                        'Validation Loss', loss_score, epoch * len(self.test_loader) + i)
+                    writer.add_scalar('Validation WU', wu,
+                                      epoch * len(self.test_loader) + i)
+                    writer.add_scalar(
+                        'Validation Accuracy', accuracy, epoch * len(self.test_loader) + i)
 
                     if i % self.log_every == 0 and i > 0:
                         print(f"Epoch {epoch + 1} of {self.epochs}"
@@ -294,8 +330,10 @@ class Trainer:
                               f"\t Learning rate {Trainer.get_learning_rate()}"
                               f"\t Validation accuracy {np.round(accuracy, 4)}")
 
-                        writer.add_scalar('Validation AUC per epoch', auc, epoch)
-                        writer.add_scalar('Validation accuracy per epoch', accuracy, epoch)
+                        writer.add_scalar(
+                            'Validation AUC per epoch', auc, epoch)
+                        writer.add_scalar(
+                            'Validation accuracy per epoch', accuracy, epoch)
 
                         val_loss = np.round(np.mean(losses), 4)
                         val_wu_epoch = np.round(wu, 4)
@@ -310,4 +348,194 @@ class Trainer:
                 auc = 0.5
                 accuracy = 0.5
 
-        return
+    def evaluate(self) -> None:
+        """ Evaluate the model training """
+
+        # Set random seed
+        random.seed(42)
+        torch.manual_seed(42)
+        np.random.seed(42)
+        torch.cuda.manual_seed_all(42)
+
+        # create the directories to stpre the experiment checkpoint, logs and results
+        exp_dir = self.experiment_directory
+        log_dir = self.log_root_path
+
+        writer = SummaryWriter(log_dir)
+
+        # initialize the training variables
+        best_val_loss = float('inf')
+        best_val_auc = float(0)
+        best_val_accuracy = float(0)
+        best_val_wu = float(0)
+        best_val_sensitivity = float(0)
+        best_val_specificity = float(0)
+        iteration_change_loss = 0
+
+        # training
+        t_start_training = time.time()
+
+        self.device
+
+        for epoch in range(self.epochs):
+            self.get_learning_rate()
+
+            t_start = time.time()
+
+            if self.metric == 'accuracy':
+                # train
+                train_loss, train_acc = self.train(writer, epoch)
+
+                # evaluate
+                val_loss, val_auc, val_accuracy, val_sensitivity, val_specificity = self.fit(
+                    writer, epoch)
+
+                self.scheduler.step()
+
+                t_end = time.time()
+                delta = t_end - t_start
+
+                print(f'Training Loss: {train_loss} - Train Accuracy: {train_acc} - Validation Los: {val_loss} - Validation AUC: {val_auc} - Validation Accuracy: {val_accuracy}'
+                      + f'Elapsed time {delta}s')
+
+                iteration_change_loss += 1
+                print('-'*100)
+
+                if val_auc > best_val_auc:
+                    best_val_auc = val_auc
+                    best_val_accuracy = val_accuracy
+                    best_val_sensitivity = val_sensitivity
+                    best_val_specificity = val_specificity
+
+                    file_name = f'model_{self.metric}_{self.task}_{self.plane}.pt.tar'
+                    for f in os.listdir(exp_dir + '/models/'):
+                        if (self.task in f) and (self.plane in f):
+                            os.remove(exp_dir + f'/models/{f}')
+                        torch.save(self.model.state_dict(),
+                                   exp_dir + f'/models/{file_name}')
+                    if val_loss < best_val_loss:
+                        best_val_loss = val_loss
+                        iteration_change_loss = 0
+
+                    if iteration_change_loss == 50:
+                        print(
+                            f'Early stopping after {iteration_change_loss} iterations any further decrease of the loss')
+                        break
+
+                # Save the results
+                with open(os.path.join(exp_dir, 'results', f'model_{self.metric}_{self.task}_{self.plane}-results.csv'), 'w') as res_file:
+                    fw = csv.writer(res_file, delimiter=',',
+                                    quotechar='|', quoting=csv.QUOTE_MINIMAL)
+                    fw.writerow(['Loss Value', 'AUC best score', 'Accuracy best score',
+                                'Sensitivity best score', 'Specifity best score'])
+                    fw.writerow([best_val_loss, best_val_auc, best_val_accuracy,
+                                best_val_sensitivity, best_val_specificity])
+                    res_file.close()
+                t_end_training = time.time()
+                print(f'Training took {t_end_training - t_start_training} s')
+
+            if self.metric == 'auc':
+                # train
+                train_loss, train_auc = self.train(writer, epoch)
+
+                # evaluate
+                val_loss, val_auc, val_accuracy, val_sensitivity, val_specificity = self.fit(
+                    writer, epoch)
+
+                self.scheduler.step()
+
+                t_end = time.time()
+                delta = t_end - t_start
+
+                print(f'Training Loss: {train_loss} - Train AUC: {train_auc} - Validation Los: {val_loss} - Validation AUC: {val_auc} - Validation Accuracy: {val_accuracy}'
+                      + f'Elapsed time {delta}s')
+
+                iteration_change_loss += 1
+                print('-'*100)
+
+                if val_auc > best_val_auc:
+                    best_val_auc = val_auc
+                    best_val_accuracy = val_accuracy
+                    best_val_sensitivity = val_sensitivity
+                    best_val_specificity = val_specificity
+
+                    file_name = f'model_{self.metric}_{self.task}_{self.plane}.pt.tar'
+                    for f in os.listdir(exp_dir + '/models/'):
+                        if (self.task in f) and (self.plane in f):
+                            os.remove(exp_dir + f'/models/{f}')
+                        torch.save(self.model.state_dict(),
+                                   exp_dir + f'/models/{file_name}')
+                    if val_loss < best_val_loss:
+                        best_val_loss = val_loss
+                        iteration_change_loss = 0
+
+                    if iteration_change_loss == 50:
+                        print(
+                            f'Early stopping after {iteration_change_loss} iterations any further decrease of the loss')
+                        break
+
+                # Save the results
+                with open(os.path.join(exp_dir, 'results', f'model_{self.metric}_{self.task}_{self.plane}-results.csv'), 'w') as res_file:
+                    fw = csv.writer(res_file, delimiter=',',
+                                    quotechar='|', quoting=csv.QUOTE_MINIMAL)
+                    fw.writerow(['Loss Value', 'AUC best score', 'Accuracy best score',
+                                'Sensitivity best score', 'Specifity best score'])
+                    fw.writerow([best_val_loss, best_val_auc, best_val_accuracy,
+                                best_val_sensitivity, best_val_specificity])
+                    res_file.close()
+
+                t_end_training = time.time()
+                print(f'training took {t_end_training - t_start_training} s')
+
+            if self.metric == 'wu':
+                # train
+                train_loss, train_wu = self.train(writer, epoch)
+
+                # evaluate
+                val_loss, val_wu, val_accuracy, val_sensitivity, val_specificity = self.fit(
+                    writer, epoch)
+
+                self.scheduler.step()
+
+                t_end = time.time()
+                delta = t_end - t_start
+
+                print(f'Training Loss: {train_loss} - Train WU: {train_wu} - Validation Los: {val_loss} - Validation WU: {val_auc} - Validation Accuracy: {val_accuracy}'
+                      + f'Elapsed time {delta}s')
+
+                iteration_change_loss += 1
+                print('-'*100)
+
+                if val_wu > best_val_wu:
+                    best_val_wu = val_wu
+                    best_val_accuracy = val_accuracy
+                    best_val_sensitivity = val_sensitivity
+                    best_val_specificity = val_specificity
+
+                    file_name = f'model_{self.metric}_{self.task}_{self.plane}.pt.tar'
+                    for f in os.listdir(exp_dir + '/models/'):
+                        if (self.task in f) and (self.plane in f):
+                            os.remove(exp_dir + f'/models/{f}')
+                        torch.save(self.model.state_dict(),
+                                   exp_dir + f'/models/{file_name}')
+                    if val_loss < best_val_loss:
+                        best_val_loss = val_loss
+                        iteration_change_loss = 0
+
+                    if iteration_change_loss == 50:
+                        print(
+                            f'Early stopping after {iteration_change_loss} iterations any further decrease of the loss')
+                        break
+
+                # Save the results
+                with open(os.path.join(exp_dir, 'results', f'model_{self.metric}_{self.task}_{self.plane}-results.csv'), 'w') as res_file:
+                    fw = csv.writer(res_file, delimiter=',',
+                                    quotechar='|', quoting=csv.QUOTE_MINIMAL)
+                    fw.writerow(['Loss Value', 'WU best score', 'Accuracy best score',
+                                'Sensitivity best score', 'Specifity best score'])
+                    fw.writerow([best_val_loss, best_val_wu, best_val_accuracy,
+                                best_val_sensitivity, best_val_specificity])
+                    res_file.close()
+
+                t_end_training = time.time()
+                print(f'Training took {t_end_training - t_start_training} s')
