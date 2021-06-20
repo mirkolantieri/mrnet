@@ -4,6 +4,6 @@ __pycache__/
 .vscode
 .vscode/
 logs/
-rescaled/
+rescaled/*
 .idea
 .idea/
