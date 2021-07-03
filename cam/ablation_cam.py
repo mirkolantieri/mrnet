@@ -35,11 +35,8 @@ class AblationCAM(BaseCAM):
     def __init__(self, model, target_layer, use_cuda=False):
         super(AblationCAM, self).__init__(model, target_layer, use_cuda)
 
-    def get_cam_weights(self, input_tensor, 
-                              target_category, 
-                              activations,
-                              grads):
-        
+    def get_cam_weights(self, input_tensor, target_category, activations, grads):
+
         with torch.no_grad():
             original_score = self.model(input_tensor)[0, target_category].cpu().numpy()
 
@@ -50,7 +47,7 @@ class AblationCAM(BaseCAM):
 
         if hasattr(self, "batch_size"):
             BATCH_SIZE = self.batch_size
-        else: 
+        else:
             BATCH_SIZE = 32
 
         with torch.no_grad():
@@ -61,12 +58,14 @@ class AblationCAM(BaseCAM):
                 if i + BATCH_SIZE > activations.shape[0]:
                     keep = i + BATCH_SIZE - activations.shape[0] - 1
                     batch_tensor = batch_tensor[:keep]
-                    ablation_layer.indices = ablation_layer.indices[:keep]                    
-                weights.extend(self.model(batch_tensor)[:, target_category].cpu().numpy())
+                    ablation_layer.indices = ablation_layer.indices[:keep]
+                weights.extend(
+                    self.model(batch_tensor)[:, target_category].cpu().numpy()
+                )
 
         weights = np.float32(weights)
         weights = (original_score - weights) / original_score
 
-        #replace the model back to the original state
+        # replace the model back to the original state
         replace_layer_recursive(self.model, ablation_layer, self.target_layer)
         return weights

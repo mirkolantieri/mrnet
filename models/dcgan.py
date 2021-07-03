@@ -12,6 +12,7 @@
 from __future__ import print_function
 
 import os
+
 # %matplotlib inline
 import random
 
@@ -66,14 +67,15 @@ ngpu = 1
 # custom weights initialization called on netG and netD
 def weights_init(m):
     classname = m.__class__.__name__
-    if classname.find('Conv') != -1:
+    if classname.find("Conv") != -1:
         nn.init.normal_(m.weight.data, 0.0, 0.02)
-    elif classname.find('BatchNorm') != -1:
+    elif classname.find("BatchNorm") != -1:
         nn.init.normal_(m.weight.data, 1.0, 0.02)
         nn.init.constant_(m.bias.data, 0)
 
 
 # Generator Class
+
 
 class Generator(nn.Module):
     def __init__(self, ngpu):
@@ -108,6 +110,7 @@ class Generator(nn.Module):
 
 # Discriminator class
 
+
 class Discriminator(nn.Module):
     def __init__(self, ngpu):
         super(Discriminator, self).__init__()
@@ -130,7 +133,7 @@ class Discriminator(nn.Module):
             nn.LeakyReLU(0.2, inplace=True),
             # state size. (ndf*8) x 4 x 4
             nn.Conv2d(ndf * 8, 1, 4, 1, 0, bias=False),
-            nn.Sigmoid()
+            nn.Sigmoid(),
         )
 
     def forward(self, input):
@@ -140,19 +143,26 @@ class Discriminator(nn.Module):
 def main():
     # We can use an image folder dataset the way we have it setup.
     # Create the dataset
-    dataset = dset.ImageFolder(root=dataroot,
-                               transform=transforms.Compose([
-                                   transforms.Resize(image_size),
-                                   transforms.CenterCrop(image_size),
-                                   transforms.ToTensor(),
-                                   transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-                               ]))
+    dataset = dset.ImageFolder(
+        root=dataroot,
+        transform=transforms.Compose(
+            [
+                transforms.Resize(image_size),
+                transforms.CenterCrop(image_size),
+                transforms.ToTensor(),
+                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+            ]
+        ),
+    )
     # Create the dataloader
-    dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
-                                             shuffle=True, num_workers=workers)
+    dataloader = torch.utils.data.DataLoader(
+        dataset, batch_size=batch_size, shuffle=True, num_workers=workers
+    )
 
     # Decide which device we want to run on
-    device = torch.device("cuda:0" if (torch.cuda.is_available() and ngpu > 0) else "cpu")
+    device = torch.device(
+        "cuda:0" if (torch.cuda.is_available() and ngpu > 0) else "cpu"
+    )
 
     # Plot some training images
     real_batch = next(iter(dataloader))
@@ -160,14 +170,20 @@ def main():
     plt.axis("off")
     plt.title("Training Images")
     plt.imshow(
-        np.transpose(vutils.make_grid(real_batch[0].to(device)[:64], padding=2, normalize=True).cpu(), (1, 2, 0)))
+        np.transpose(
+            vutils.make_grid(
+                real_batch[0].to(device)[:64], padding=2, normalize=True
+            ).cpu(),
+            (1, 2, 0),
+        )
+    )
     plt.show()
 
     # Create the generator
     netG = Generator(ngpu).to(device)
 
     # Handle multi-gpu if desired
-    if (device.type == 'cuda') and (ngpu > 1):
+    if (device.type == "cuda") and (ngpu > 1):
         netG = nn.DataParallel(netG, list(range(ngpu)))
 
     # Apply the weights_init function to randomly initialize all weights
@@ -180,7 +196,7 @@ def main():
     netD = Discriminator(ngpu).to(device)
 
     # Handle multi-gpu if desired
-    if (device.type == 'cuda') and (ngpu > 1):
+    if (device.type == "cuda") and (ngpu > 1):
         netD = nn.DataParallel(netD, list(range(ngpu)))
 
     # Apply the weights_init function to randomly initialize all weights
@@ -198,8 +214,8 @@ def main():
     fixed_noise = torch.randn(64, nz, 1, 1, device=device)
 
     # Establish convention for real and fake labels during training
-    real_label = 1.
-    fake_label = 0.
+    real_label = 1.0
+    fake_label = 0.0
 
     # Setup Adam optimizers for both G and D
     optimizerD = optim.Adam(netD.parameters(), lr=lr, betas=(beta1, 0.999))
@@ -271,16 +287,29 @@ def main():
 
             # Output training stats
             if i % 50 == 0:
-                print('[%d/%d][%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f\tD(x): %.4f\tD(G(z)): %.4f / %.4f'
-                      % (epoch, num_epochs, i, len(dataloader),
-                         errD.item(), errG.item(), D_x, D_G_z1, D_G_z2))
+                print(
+                    "[%d/%d][%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f\tD(x): %.4f\tD(G(z)): %.4f / %.4f"
+                    % (
+                        epoch,
+                        num_epochs,
+                        i,
+                        len(dataloader),
+                        errD.item(),
+                        errG.item(),
+                        D_x,
+                        D_G_z1,
+                        D_G_z2,
+                    )
+                )
 
             # Save Losses for plotting later
             G_losses.append(errG.item())
             D_losses.append(errD.item())
 
             # Check how the generator is doing by saving G's output on fixed_noise
-            if (iters % 500 == 0) or ((epoch == num_epochs - 1) and (i == len(dataloader) - 1)):
+            if (iters % 500 == 0) or (
+                (epoch == num_epochs - 1) and (i == len(dataloader) - 1)
+            ):
                 with torch.no_grad():
                     fake = netG(fixed_noise).detach().cpu()
                 img_list.append(vutils.make_grid(fake, padding=2, normalize=True))
@@ -300,7 +329,9 @@ def main():
     fig = plt.figure(figsize=(8, 8))
     plt.axis("off")
     ims = [[plt.imshow(np.transpose(i, (1, 2, 0)), animated=True)] for i in img_list]
-    ani = animation.ArtistAnimation(fig, ims, interval=1000, repeat_delay=1000, blit=True)
+    ani = animation.ArtistAnimation(
+        fig, ims, interval=1000, repeat_delay=1000, blit=True
+    )
 
     HTML(ani.to_jshtml())
 
@@ -313,7 +344,13 @@ def main():
     plt.axis("off")
     plt.title("Real Images")
     plt.imshow(
-        np.transpose(vutils.make_grid(real_batch[0].to(device)[:64], padding=5, normalize=True).cpu(), (1, 2, 0)))
+        np.transpose(
+            vutils.make_grid(
+                real_batch[0].to(device)[:64], padding=5, normalize=True
+            ).cpu(),
+            (1, 2, 0),
+        )
+    )
 
     # Plot the fake images from the last epoch
     plt.subplot(1, 2, 2)
@@ -322,12 +359,12 @@ def main():
     plt.imshow(np.transpose(img_list[-1], (1, 2, 0)))
     plt.show()
 
-    if not os.path.exists('./gans/'):
-        os.mkdir('./gans/')
+    if not os.path.exists("./gans/"):
+        os.mkdir("./gans/")
 
     for i in range(len(img_list)):
         image = img_list[i]
-        save_image(image, f'./gans/gan_{i}.jpg')
+        save_image(image, f"./gans/gan_{i}.jpg")
 
 
 if __name__ == "__main__":

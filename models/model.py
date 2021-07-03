@@ -12,7 +12,7 @@ import torch
 import torch.nn as nn
 from torchvision import models
 
-torch.multiprocessing.set_sharing_strategy('file_system')
+torch.multiprocessing.set_sharing_strategy("file_system")
 
 # Reserved space for the implementation of the AlexNet based AI CNN (optimized already)
 

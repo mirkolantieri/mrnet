@@ -1,14 +1,14 @@
 import os
+import time
+
 from helper import utils as ut
 from models.resnet18 import Resnet18
 from PIL import Image
 from tqdm import tqdm
-import time
 
 
 class Similar:
-
-    def __init__(self, model: Resnet18 = None, input_dir='', output_dir='') -> None:
+    def __init__(self, model: Resnet18 = None, input_dir="", output_dir="") -> None:
         self.model = Resnet18() if model is None else model
         self.input_dir = input_dir
         self.output_dir = output_dir
@@ -52,8 +52,10 @@ class Similar:
         beg = time.thread_time()
         for i in img:
             ut.plot_similar_images(input_dir, i, 4, 1, label, score)
-        print(f"Completed in {time.thread_time() - beg} s", )
+        print(
+            f"Completed in {time.thread_time() - beg} s",
+        )
 
 
-if __name__ == '__main__':
-    Similar().find_similarity('../images/selected/', '../images/rescaled/')
+# if __name__ == '__main__':
+#     Similar().find_similarity('../images/selected/', '../images/rescaled/')

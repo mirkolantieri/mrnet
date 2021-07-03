@@ -25,13 +25,16 @@ class Resnet18(torch.nn.Module):
 
         # normalize the resized images as expected by resnet18
         # [0.485, 0.456, 0.406] --> normalized mean value of ImageNet, [0.229, 0.224, 0.225] std of ImageNet
-        self.normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+        self.normalize = transforms.Normalize(
+            mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+        )
 
     def get_feature_array(self, img):
         image = self.normalize(self.toTensor(img)).unsqueeze(0).to(self.device)
         embedding = torch.zeros(1, self.numberFeatures, 1, 1)
 
-        def copy_data(m, i, o): embedding.copy_(o.data)
+        def copy_data(m, i, o):
+            embedding.copy_(o.data)
 
         h = self.featureLayer.register_forward_hook(copy_data)
         self.model(image)
@@ -41,7 +44,7 @@ class Resnet18(torch.nn.Module):
 
     def get_feature_layer(self):
         model = models.resnet18(pretrained=True)
-        layer = model._modules.get('avgpool')
+        layer = model._modules.get("avgpool")
         self.layer_output_size = 512
 
         return model, layer

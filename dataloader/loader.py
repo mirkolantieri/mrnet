@@ -25,19 +25,28 @@ class MRDataset(data.Dataset):
         self.train = train
         transform = None
         if self.train:
-            self.folder_path = self.root_dir + 'train/{0}/'.format(plane)
+            self.folder_path = self.root_dir + "train/{0}/".format(plane)
             self.records = pd.read_csv(
-                self.root_dir + 'train-{0}.csv'.format(tear), header=None, names=['id', 'label'])
+                self.root_dir + "train-{0}.csv".format(tear),
+                header=None,
+                names=["id", "label"],
+            )
         else:
-            self.folder_path = self.root_dir + 'valid/{0}/'.format(plane)
+            self.folder_path = self.root_dir + "valid/{0}/".format(plane)
             self.records = pd.read_csv(
-                self.root_dir + 'valid-{0}.csv'.format(tear), header=None, names=['id', 'label'])
+                self.root_dir + "valid-{0}.csv".format(tear),
+                header=None,
+                names=["id", "label"],
+            )
 
-        self.records['id'] = self.records['id'].map(
-            lambda i: '0' * (4 - len(str(i))) + str(i))
-        self.paths = [self.folder_path + filename +
-                      '.npy' for filename in self.records['id'].tolist()]
-        self.labels = self.records['label'].tolist()
+        self.records["id"] = self.records["id"].map(
+            lambda i: "0" * (4 - len(str(i))) + str(i)
+        )
+        self.paths = [
+            self.folder_path + filename + ".npy"
+            for filename in self.records["id"].tolist()
+        ]
+        self.labels = self.records["label"].tolist()
 
         self.transform = transform
         if weights is None:
@@ -64,7 +73,7 @@ class MRDataset(data.Dataset):
 
         # data standardization
         array = (array - 58.09) / 49.73
-        array = np.stack((array,)*3, axis=1)
+        array = np.stack((array,) * 3, axis=1)
 
         array = torch.FloatTensor(array)  # array size is now [S, 224, 224, 3]
 

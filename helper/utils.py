@@ -129,7 +129,7 @@ def weighted_utility(y_true, y_preds, gamma=1):
             sigma(y_preds[i] | thresholds[i]) = 1 if y_preds[1] > thresholds[i] else 0
         )
     """
-    np.seterr(divide='ignore', invalid='ignore')
+    np.seterr(divide="ignore", invalid="ignore")
 
     # Set array to 1D
     y_true = np.array(y_true).reshape(-1, 1)
@@ -160,7 +160,8 @@ def weighted_utility(y_true, y_preds, gamma=1):
 
     for preds in y_preds:
         if preds <= t and preds >= gamma * t:
-            if gamma == 1: pass
+            if gamma == 1:
+                pass
             s = (preds - (gamma * t)) / ((1 - gamma) * t)
             sigma.append(max(s))
         if preds > t:
@@ -171,7 +172,9 @@ def weighted_utility(y_true, y_preds, gamma=1):
     # Calculate the weighted utility
     wU = []
     for i in sigma:
-        s = (pow(pos, -1) * sum(r.importances * i)) - (pow(pos, -1) * sum(r.importances * (t / (1 - t)) * i))
+        s = (pow(pos, -1) * sum(r.importances * i)) - (
+            pow(pos, -1) * sum(r.importances * (t / (1 - t)) * i)
+        )
         wU.append(s)
 
     # Normalize the values of the weights
@@ -247,13 +250,15 @@ def rescale_image(input_dir, output, input_dim=(250, 250)):
 
 
 def get_similarity_matrix(vectors):
-    """ Calculate for all vectors the cosine similarity to the other vectors.
+    """Calculate for all vectors the cosine similarity to the other vectors.
 
-        Note that this matrix may become huge, hence inefficient, with many thousands of images
+    Note that this matrix may become huge, hence inefficient, with many thousands of images
     """
     v = np.array(list(vectors.values())).T
     sim = np.inner(v.T, v.T) / (
-            (np.linalg.norm(v, axis=0).reshape(-1, 1)) * ((np.linalg.norm(v, axis=0).reshape(-1, 1)).T))
+        (np.linalg.norm(v, axis=0).reshape(-1, 1))
+        * ((np.linalg.norm(v, axis=0).reshape(-1, 1)).T)
+    )
     keys = list(vectors.keys())
     matrix = pd.DataFrame(sim, columns=keys, index=keys)
 
@@ -262,7 +267,7 @@ def get_similarity_matrix(vectors):
 
 def top_entries(knum, sim_matrix):
     """
-        `top_entries`: sort the values per item and store the top similar entries in another data structure
+    `top_entries`: sort the values per item and store the top similar entries in another data structure
     """
 
     sim_name = pd.DataFrame(index=sim_matrix.index, columns=range(knum))
@@ -304,28 +309,65 @@ def plot_similar_images(input_dir, image, cols, rows, sim_names, sim_val):
     thickness = 3
     # Using cv2.putText() method
 
-    zero_lab = ['case99axial.jpg', 'case99coronal.jpg', 'case99sagittal.jpg', 'case227axial.jpg',
-                'case227coronal.jpg', 'case227sagittal.jpg', 'case238axial.jpg', 'case238coronal.jpg',
-                'case238sagittal.jpg',
-                'case244axial.jpg', 'case244coronal.jpg', 'case244sagittal.jpg',
-                'case245axial.jpg', 'case245coronal.jpg', 'case245sagittal.jpg', ]
+    zero_lab = [
+        "case99axial.jpg",
+        "case99coronal.jpg",
+        "case99sagittal.jpg",
+        "case227axial.jpg",
+        "case227coronal.jpg",
+        "case227sagittal.jpg",
+        "case238axial.jpg",
+        "case238coronal.jpg",
+        "case238sagittal.jpg",
+        "case244axial.jpg",
+        "case244coronal.jpg",
+        "case244sagittal.jpg",
+        "case245axial.jpg",
+        "case245coronal.jpg",
+        "case245sagittal.jpg",
+    ]
     # now plot the  most simliar images
     for j in range(0, cols * rows):
         if j == 0:
             img = cv2.imread((os.path.join(input_dir, image)))
-            img = cv2.putText(img, f'Caso in analisi {image}', org, font, fontScale, color, thickness, cv2.LINE_AA)
+            img = cv2.putText(
+                img,
+                f"Caso in analisi {image}",
+                org,
+                font,
+                fontScale,
+                color,
+                thickness,
+                cv2.LINE_AA,
+            )
         else:
-            for i in os.listdir('../images/selected/'):
+            for i in os.listdir("../images/selected/"):
                 if i in zero_lab == os.path.join(input_dir, simImages[j - 1]):
                     a = 0
                 else:
                     a = 1
             img1 = cv2.imread(os.path.join(input_dir, simImages[j - 1]))
-            img1 = cv2.putText(img1, f'Caso simile con {simImages[j - 1]}'
-                                     f'  {100 * np.round(simValues[j - 1], 2)}%', org, font, fontScale, color,
-                               thickness, cv2.LINE_AA)
-            img1 = cv2.putText(img1, f'Label true [ {a} ]', (10, 2490), font, fontScale, color,
-                               thickness, cv2.LINE_AA)
+            img1 = cv2.putText(
+                img1,
+                f"Caso simile con {simImages[j - 1]}"
+                f"  {100 * np.round(simValues[j - 1], 2)}%",
+                org,
+                font,
+                fontScale,
+                color,
+                thickness,
+                cv2.LINE_AA,
+            )
+            img1 = cv2.putText(
+                img1,
+                f"Label true [ {a} ]",
+                (10, 2490),
+                font,
+                fontScale,
+                color,
+                thickness,
+                cv2.LINE_AA,
+            )
 
             img = cv2.hconcat([img, img1])
-        cv2.imwrite(f'../images/similar/{image}', img)
+        cv2.imwrite(f"../images/similar/{image}", img)
