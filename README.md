@@ -8,9 +8,10 @@
 # Table of contents
 1. [Introduction](#introduction)
 2. [Dataset](#dataset)
-    1. [25 most difficult cases](#difficult_cases)
+    1. [25 most difficult cases](#complex_cases)
     2. [25 most highest disagreement cases](#disagreement)
 3. [Dependencies](#dependencies)
+4. [Python modules](#modules)
 
 
 ---
@@ -22,12 +23,13 @@ from patients having problems or hidden disease. The main interest is to
 comprehend that if for a given MRI scan image, the prediction from the
 model is helpful for a radiologist in terms of utility instead of accuracy. We are interested in creating 2 AI models consisting of 
 Convolutional Neural Networks:
-* one generic model based on a simplistic implementation of a CNN and AlexNet architecture
-* one model having implemented in-structure hyperparameter tuning implementation, guided by an utility-based method
+* one generic model based on a simplistic implementation of  AlexNet architecture tuned with hyperparameter, guided by AUC metric
+* one model having implemented in-structure hyperparameter tuning implementation, guided by weighted-utility metric
 
  
 After the implementation of the two main models we will then implement the
-activation map for each medical case.
+activation map for each medical case, (utilizing the features from the
+two models) and  the similarity of each case.
 
 ---
 
@@ -61,15 +63,14 @@ You can download the dataset from the above link
 
 <br>
 
-## 2.1 The 25 Most Difficult Cases <a name="difficult_cases"></a>
+## 2.1 The 25 Most Complex Cases <a name="complex_cases"></a>
 Top radiologist from *Istituto Ortopedico Galeazzi di Milano* 
-are chosen as interpreters for the MRI diagnoses: their task was to evaluate a total number 420 cases from a score on-going
-from 1 (least complex) to 5 (most complex) points, where they would indicate the complexity
+are chosen as interpreters for the MRI diagnoses: their task was to evaluate a total number of 420 cases from with a score on-going
+from 1 (least complex) to 5 (most complex) points, indicating the complexity
 of the case under evaluation. <br>
 This task was accomplished utilizing an online questionnaire 
 and the obtained results was stored using a `.csv` file.
-<br> Afterwards we calculated by mean and sorted the 25 most
-complex cases.
+<br> Afterwards the 25 most complex cases are sorted by applying the mean rate for each record .
 
 <br>
 
@@ -78,7 +79,7 @@ The radiologist were also needed to rate the agreement of the case.
 This time the agreement rate was normalized in order to obtain 
 a probability result of [0,1]. Also in this task the selected
 cases are 25, especially those with the highest disagreement
-rate which is obviously sorted by mean.
+rate which is sorted by mean.
 The script for the execution of the complexity and disagreement
 is located under `cases.py` while the `.csv` files are located
 into the `./cases/` folder. 
@@ -92,10 +93,18 @@ dependencies which can be found under
 `requirements.txt`. Here is how to install:
 
 **Terminal (Mac/Linux)**
+
 Type: `pip3 install -r requirements.txt` 
 
 
 **Powershell/Command Prompt (Windows)**
+
 Type: `pip install -r requirements.txt`
 
+---
+
+# 4. Run python modules <a name="modules"></a>
+To execute the files it is required to use the following command in your terminal:
+
+    $ python3 -m module_name.submodule_name
 

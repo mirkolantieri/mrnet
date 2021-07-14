@@ -1,6 +1,6 @@
+from __future__ import absolute_import
 import os
 import time
-
 from helper import utils as ut
 from models.resnet18 import Resnet18
 from PIL import Image
