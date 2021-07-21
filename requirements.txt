@@ -16,3 +16,6 @@ ipython
 git+https://github.com/ncullen93/torchsample
 torch-tb-profiler
 tensorboardX
+krippendorff
+seaborn
+yellowbrick
