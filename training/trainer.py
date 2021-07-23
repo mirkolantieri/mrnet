@@ -27,7 +27,7 @@ from helper import utils as ut
 from models.model import AlexNet
 from numpy.random import seed
 from sklearn import metrics
-from tensorboardX import SummaryWriter, writer
+from tensorboardX import SummaryWriter
 
 torch.multiprocessing.set_sharing_strategy('file_system')
 
@@ -48,8 +48,7 @@ class Trainer:
         self.device = torch.device(
             'cuda' if torch.cuda.is_available() else 'cpu')
         self.lr = learning_rate
-        self.optimizer = optim.Adam(
-            self.model.parameters(), lr=self.lr, weight_decay=1e-2)
+        self.optimizer = optim.Adam(AlexNet().parameters(), lr=self.lr, weight_decay=1e-2)
         if scheduler == 'plateau':
             self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
                 self.optimizer, patience=5, factor=.3, threshold=1e-4, verbose=True
@@ -539,3 +538,9 @@ class Trainer:
 
                 t_end_training = time.time()
                 print(f'Training took {t_end_training - t_start_training} s')
+
+
+if __name__ == "__main__":
+    writer = SummaryWriter()
+    Trainer('auc').fit(writer, 20)
+    
