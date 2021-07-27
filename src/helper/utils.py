@@ -22,6 +22,7 @@ import cv2
 import numpy as np
 from numpy.random import rand
 import pandas as pd
+from scipy.spatial.distance import jaccard
 import sklearn.metrics as metrics
 import torch
 from numpy.core.fromnumeric import mean, size
@@ -31,7 +32,7 @@ from scipy.ndimage import shift
 from skimage.transform import rotate
 from sklearn.inspection import permutation_importance
 from sklearn.linear_model import Ridge
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, jaccard_score
 from torchvision.transforms import Compose, Normalize, Resize, ToTensor
 import matplotlib.pyplot as plt
 
@@ -255,6 +256,7 @@ def get_similarity_matrix(vectors):
     Note that this matrix may become huge, hence inefficient, with many thousands of images
     """
     v = np.array(list(vectors.values())).T
+    
     sim = np.inner(v.T, v.T) / (
         (np.linalg.norm(v, axis=0).reshape(-1, 1))
         * ((np.linalg.norm(v, axis=0).reshape(-1, 1)).T)
@@ -309,23 +311,7 @@ def plot_similar_images(input_dir, image, cols, rows, sim_names, sim_val):
     thickness = 3
     # Using cv2.putText() method
 
-    zero_lab = [
-        "case99axial.jpg",
-        "case99coronal.jpg",
-        "case99sagittal.jpg",
-        "case227axial.jpg",
-        "case227coronal.jpg",
-        "case227sagittal.jpg",
-        "case238axial.jpg",
-        "case238coronal.jpg",
-        "case238sagittal.jpg",
-        "case244axial.jpg",
-        "case244coronal.jpg",
-        "case244sagittal.jpg",
-        "case245axial.jpg",
-        "case245coronal.jpg",
-        "case245sagittal.jpg",
-    ]
+    
     # now plot the  most simliar images
     for j in range(0, cols * rows):
         if j == 0:
@@ -341,11 +327,6 @@ def plot_similar_images(input_dir, image, cols, rows, sim_names, sim_val):
                 cv2.LINE_AA,
             )
         else:
-            for i in os.listdir("../images/selected/"):
-                if i in zero_lab == os.path.join(input_dir, simImages[j - 1]):
-                    a = 0
-                else:
-                    a = 1
             img1 = cv2.imread(os.path.join(input_dir, simImages[j - 1]))
             img1 = cv2.putText(
                 img1,
@@ -358,16 +339,6 @@ def plot_similar_images(input_dir, image, cols, rows, sim_names, sim_val):
                 thickness,
                 cv2.LINE_AA,
             )
-            img1 = cv2.putText(
-                img1,
-                f"Label true [ {a} ]",
-                (10, 2490),
-                font,
-                fontScale,
-                color,
-                thickness,
-                cv2.LINE_AA,
-            )
 
             img = cv2.hconcat([img, img1])
-        cv2.imwrite(f"../images/similar/{image}", img)
+        cv2.imwrite(f"../src/images/maps/{image}", img)

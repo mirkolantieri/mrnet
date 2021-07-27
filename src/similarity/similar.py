@@ -38,7 +38,7 @@ class Similar:
         print("Creating the similarity matrix ...")
         matrix = ut.get_similarity_matrix(all_features)
         label, score = ut.top_entries(4, matrix)
-
+        matrix.to_csv('./act_sim_wu.csv', sep=',', header=True)
         # Append the image to the array list
         img = []
         for i in os.listdir(input_dir):
@@ -48,14 +48,16 @@ class Similar:
         # img.sort()
 
         # Find the similarity and save
-        print("Saving images ...")
-        beg = time.thread_time()
-        for i in img:
-            ut.plot_similar_images(input_dir, i, 4, 1, label, score)
-        print(
-            f"Completed in {time.thread_time() - beg} s",
-        )
+        # print("Saving images ...")
+        # beg = time.thread_time()
+        # for i in img:
+        #     ut.plot_similar_images(input_dir, i, 4, 1, label, score)
+        # print(
+        #     f"Completed in {time.thread_time() - beg} s",
+        # )
 
 
-# if __name__ == '__main__':
-#     Similar().find_similarity('../images/selected/', '../images/rescaled/')
+
+if __name__ == '__main__':
+    Similar().find_similarity('../src/images/activations/wu/', '../src/images/rescaled/')
+
