@@ -83,4 +83,12 @@ baseline.model <- decision_curve(Score.x ~ Score.y,
 
 plot_decision_curve(baseline.model,  curve.names = "Complex cases - ACL class (Model Wu) ")
 
+# ROC CURVE WITH PRECISION - RECALL
+library(precrec)
+precrec_obj <- evalmod(scores = meniscus$Score.y, labels = meniscus$Score.x, mode="rocprc")
+plot(precrec_obj)
 
+
+library(ROCit)
+ROCit_obj <- rocit(score= meniscus$Score.y,class= meniscus$Score.x, method = "empirical")
+plot(ROCit_obj)
