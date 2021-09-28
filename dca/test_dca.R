@@ -1,6 +1,6 @@
 # Import library
 library(rmda)
-
+library(ROCit)
 
 # Test set Model AUC
 meniscus_lab <- read.csv2('./results (model auc)/Test Set/meniscus-label.csv', sep = ',')
