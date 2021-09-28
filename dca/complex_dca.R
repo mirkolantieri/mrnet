@@ -33,7 +33,7 @@ baseline.model <- decision_curve(Score.x ~ Score.y,
                                  policy = "opt-in",
                                  bootstraps = 50)
 
-plot_decision_curve(baseline.model,  curve.names = "Complex cases - Abnormal class (Model AUC) ")
+plot_decision_curve(baseline.model,  curve.names = "Complex cases - Abnormal class (Model AUC) ", col = c('orange', 'blue'),  )
 
 baseline.model <- decision_curve(Score.x ~ Score.y,
                                  data = acl,
