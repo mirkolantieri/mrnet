@@ -1,6 +1,7 @@
 # Import library
 library(rmda)
-
+library(ROCit)
+library(ggplot2)
 
 # Complex Model AUC
 meniscus_lab <- read.csv2('./results (model auc)/Complex/complex-meniscus-label.csv', sep = ',')
@@ -12,14 +13,26 @@ abn_pred <- read.csv2('./results (model auc)/Complex/complex-abnormal-prediction
 acl_lab <- read.csv2('./results (model auc)/Complex/complex-acl-label.csv', sep = ',')
 acl_pred <- read.csv2('./results (model auc)/Complex/complex-acl-prediction.csv', sep = ',')
 
-
+# Merge label-pred score 
 meniscus <- merge(meniscus_lab, meniscus_pred, by="Case", all=TRUE)
 abn <- merge(abn_lab, abn_pred, by = "Case", all=TRUE)
 acl <- merge(acl_lab, abn_pred, by = "Case", all=TRUE)
 
-head(meniscus)
-head(abn)
-head(acl)
+# Create ROC Curve 
+men_roc <- rocit(score= meniscus$Score.y,class= meniscus$Score.x, method = "bin")
+abn_roc <- rocit(score= abn$Score.y,class= abn$Score.x, method = "bin")
+acl_roc <- rocit(score= acl$Score.y,class= acl$Score.x, method = "empirical")
+
+plot(men_roc, col = c("blue", "orange", "red"), main="ROC Curve of Complex Case - Model Blue")
+lines(abn_roc$TPR~abn_roc$FPR, col = "red" )
+lines(acl_roc$TPR~acl_roc$FPR, col = "green" )
+
+
+plot(abn_roc, legend= FALSE, col = c("blue", "orange", "red"))
+plot(acl_roc, legend= FALSE, col = c("blue", "orange", "red"))
+
+
+
 
 baseline.model <- decision_curve(Score.x ~ Score.y,
                                  data = meniscus,
@@ -84,11 +97,11 @@ baseline.model <- decision_curve(Score.x ~ Score.y,
 plot_decision_curve(baseline.model,  curve.names = "Complex cases - ACL class (Model Wu) ")
 
 # ROC CURVE WITH PRECISION - RECALL
-library(precrec)
-precrec_obj <- evalmod(scores = meniscus$Score.y, labels = meniscus$Score.x, mode="rocprc")
-plot(precrec_obj)
+#library(precrec)
+#precrec_obj <- evalmod(scores = meniscus$Score.y, labels = meniscus$Score.x, mode="rocprc")
+#plot(precrec_obj)
 
 
-library(ROCit)
-ROCit_obj <- rocit(score= meniscus$Score.y,class= meniscus$Score.x, method = "empirical")
-plot(ROCit_obj)
+
+#ROCit_obj <- rocit(score= meniscus$Score.y,class= meniscus$Score.x, method = "empirical")
+#plot(ROCit_obj)
