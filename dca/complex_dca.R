@@ -40,21 +40,24 @@ baseline.model <- decision_curve(Score.x ~ Score.y,
                                  policy = "opt-in",
                                  bootstraps = 50)
 
-plot_decision_curve(baseline.model,  curve.names = "Complex cases - Meniscus class (Model AUC) ")
+plot_decision_curve(baseline.model,  curve.names = "Complex cases - Meniscus class (Model Blue)", 
+                    col = c("darkblue", "orange"))
 
 baseline.model <- decision_curve(Score.x ~ Score.y,
                                  data = abn,
                                  policy = "opt-in",
                                  bootstraps = 50)
 
-plot_decision_curve(baseline.model,  curve.names = "Complex cases - Abnormal class (Model AUC) ", col = c('orange', 'blue'),  )
+plot_decision_curve(baseline.model,  curve.names = "Complex cases - Abnormal class (Model Blue) ", 
+                    col = c('red', 'green'),  )
 
 baseline.model <- decision_curve(Score.x ~ Score.y,
                                  data = acl,
                                  policy = "opt-in",
                                  bootstraps = 50)
 
-plot_decision_curve(baseline.model,  curve.names = "Complex cases - ACL class (Model AUC) ")
+plot_decision_curve(baseline.model,  curve.names = "Complex cases - ACL class (Model Blue)",
+                    col = c("darkorange", "navy"))
 
 # Complex Model WU
 
@@ -91,21 +94,24 @@ baseline.model <- decision_curve(Score.x ~ Score.y,
                                  policy = "opt-in",
                                  bootstraps = 50)
 
-plot_decision_curve(baseline.model,  curve.names = "Complex cases - Meniscus class (Model WU) ")
+plot_decision_curve(baseline.model,  curve.names = "Complex cases - Meniscus class (Model Green)",
+                    col = c("blue", "red"))
 
 baseline.model <- decision_curve(Score.x ~ Score.y,
                                  data = abn,
                                  policy = "opt-in",
                                  bootstraps = 50)
 
-plot_decision_curve(baseline.model,  curve.names = "Complex cases - Abnormal class (Model WU) ")
+plot_decision_curve(baseline.model,  curve.names = "Complex cases - Abnormal class (Model Green) ",
+                    col = c("orange", "black"))
 
 baseline.model <- decision_curve(Score.x ~ Score.y,
                                  data = acl,
                                  policy = "opt-in",
                                  bootstraps = 50)
 
-plot_decision_curve(baseline.model,  curve.names = "Complex cases - ACL class (Model Wu) ")
+plot_decision_curve(baseline.model,  curve.names = "Complex cases - ACL class (Model Green) ",
+                    col = c("green", "navy"))
 
 # ROC CURVE WITH PRECISION - RECALL
 #library(precrec)
