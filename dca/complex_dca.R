@@ -3,6 +3,7 @@ library(rmda)
 library(ROCit)
 library(ggplot2)
 
+
 # Complex Model AUC
 meniscus_lab <- read.csv2('./results (model auc)/Complex/complex-meniscus-label.csv', sep = ',')
 meniscus_pred <- read.csv2('./results (model auc)/Complex/complex-meniscus-prediction.csv', sep = ',')
@@ -16,12 +17,12 @@ acl_pred <- read.csv2('./results (model auc)/Complex/complex-acl-prediction.csv'
 # Merge label-pred score 
 meniscus <- merge(meniscus_lab, meniscus_pred, by="Case", all=TRUE)
 abn <- merge(abn_lab, abn_pred, by = "Case", all=TRUE)
-acl <- merge(acl_lab, abn_pred, by = "Case", all=TRUE)
+acl <- merge(acl_lab, acl_pred, by = "Case", all=TRUE)
 
 # Create ROC Curve 
 men_roc <- rocit(score= meniscus$Score.y,class= meniscus$Score.x, method = "bin")
 abn_roc <- rocit(score= abn$Score.y,class= abn$Score.x, method = "bin")
-acl_roc <- rocit(score= acl$Score.y,class= acl$Score.x, method = "empirical")
+acl_roc <- rocit(score= acl$Score.y,class= acl$Score.x, method = "bin")
 
 plot(men_roc, legend=FALSE, col = c("blue", "orange", "red"))
 title(main="ROC Curve of Complex Case - Model Blue")
@@ -30,7 +31,6 @@ lines(acl_roc$TPR~acl_roc$FPR, col = "green" )
 legend("bottomright", col = c("blue", "red", "green"),
        c("Meniscus", "Abnormal",
          "ACL"), lwd = 2)
-
 
 
 
@@ -70,12 +70,12 @@ acl_pred <- read.csv2('./results (model wu)/Complex/complex-acl-prediction.csv',
 
 meniscus <- merge(meniscus_lab, meniscus_pred, by = "Case", all = TRUE)
 abn <- merge(abn_lab, abn_pred, by = "Case", all = TRUE)
-acl <- merge(acl_lab, abn_pred, by = "Case", all = TRUE)
+acl <- merge(acl_lab, acl_pred, by = "Case", all = TRUE)
 
 # Create ROC Curve 
 men_roc <- rocit(score= meniscus$Score.y,class= meniscus$Score.x, method = "bin")
 abn_roc <- rocit(score= abn$Score.y,class= abn$Score.x, method = "bin")
-acl_roc <- rocit(score= acl$Score.y,class= acl$Score.x, method = "empirical")
+acl_roc <- rocit(score= acl$Score.y,class= acl$Score.x, method = "bin")
 
 plot(men_roc, legend=FALSE, col = c("blue", "orange", "red"))
 title(main="ROC Curve of Complex Case - Model Green")

@@ -15,11 +15,11 @@ acl_pred <- read.csv2('./results (model auc)/Test Set/acl-prediction.csv', sep =
 
 meniscus <- merge(meniscus_lab, meniscus_pred, by="Case", all=TRUE)
 abn <- merge(abn_lab, abn_pred, by = "Case", all=TRUE)
-acl <- merge(acl_lab, abn_pred, by = "Case", all=TRUE)
+acl <- merge(acl_lab, acl_pred, by = "Case", all=TRUE)
 
 men_roc <- rocit(score= meniscus$Score.y,class= meniscus$Score.x, method = "bin")
 abn_roc <- rocit(score= abn$Score.y,class= abn$Score.x, method = "bin")
-acl_roc <- rocit(score= acl$Score.y,class= acl$Score.x, method = "empirical")
+acl_roc <- rocit(score= acl$Score.y,class= acl$Score.x, method = "bin")
 
 plot(men_roc, legend=FALSE, col = c("blue", "orange", "red"))
 title(main="ROC Curve (Validation Set) - Model Blue")
@@ -64,11 +64,11 @@ acl_pred <- read.csv2('./results (model wu)/Test Set/acl-prediction.csv', sep = 
 
 meniscus <- merge(meniscus_lab, meniscus_pred, by = "Case", all = TRUE)
 abn <- merge(abn_lab, abn_pred, by = "Case", all = TRUE)
-acl <- merge(acl_lab, abn_pred, by = "Case", all = TRUE)
+acl <- merge(acl_lab, acl_pred, by = "Case", all = TRUE)
 
 men_roc <- rocit(score= meniscus$Score.y,class= meniscus$Score.x, method = "bin")
 abn_roc <- rocit(score= abn$Score.y,class= abn$Score.x, method = "bin")
-acl_roc <- rocit(score= acl$Score.y,class= acl$Score.x, method = "empirical")
+acl_roc <- rocit(score= acl$Score.y,class= acl$Score.x, method = "bin")
 
 plot(men_roc, legend=FALSE, col = c("blue", "orange", "red"))
 title(main="ROC Curve (Validation Set) - Model Green")
