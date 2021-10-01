@@ -53,10 +53,12 @@ agree(acl_ratings_wu)
 
 
 # Cohen's Kappa
+print("Model Blue Cohen's Kappa - Complex Case")
 kappa2(men_ratings)
 kappa2(abn_ratings)
 kappa2(acl_ratings)
 
+print("Model Green Cohen's Kappa - Complex Case")
 kappa2(men_ratings_wu)
 kappa2(abn_ratings_wu)
 kappa2(acl_ratings_wu)
@@ -122,10 +124,11 @@ agree(acl_ratings_test_wu)
 
 
 # Cohen's Kappa
+print("Model Blue Cohen's Kappa - Validation Set")
 kappa2(men_ratings_test)
 kappa2(abn_ratings_test)
 kappa2(acl_ratings_test)
-
+print("Model Green Cohen's Kappa - Validation Set")
 kappa2(men_ratings_test_wu)
 kappa2(abn_ratings_test_wu)
 kappa2(acl_ratings_test_wu)
