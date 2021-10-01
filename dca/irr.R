@@ -1,6 +1,7 @@
 #install.packages("irr")
 #install.packages("tidyverse")
 library(irr)
+library(icr)
 library(tidyverse)
 
 # Complex Model AUC - Model WU
@@ -64,10 +65,15 @@ kappa2(abn_ratings_wu)
 kappa2(acl_ratings_wu)
 
 
-# Krippendorff's alpha
-kripp.alpha(men_ratings, method = "ordinal")
-kripp.alpha(abn_ratings, method = "ordinal")
-kripp.alpha(acl_ratings, method = "ordinal")
+# Krippendorff's alpha 
+print("Model Blue Krippendorff's Alpha - Complex Case")
+krippalpha(men, metric = "ordinal")
+krippalpha(abn, metric = "ordinal")
+krippalpha(acl, metric = "ordinal")
+print("Model Green Krippendorff's Alpha - Complex Case")
+krippalpha(men_wu, metric = "ordinal")
+krippalpha(abn_wu, metric = "ordinal")
+krippalpha(acl_wu, metric = "ordinal")
 
 # Validation Model AUC - WU
 
@@ -132,3 +138,18 @@ print("Model Green Cohen's Kappa - Validation Set")
 kappa2(men_ratings_test_wu)
 kappa2(abn_ratings_test_wu)
 kappa2(acl_ratings_test_wu)
+
+# Krippendorff
+
+print("Model Blue Krippendorff's Alpha - Validation Set")
+krippalpha(men_test, metric = "ordinal")
+krippalpha(abn_test, metric = "ordinal")
+krippalpha(acl_test, metric = "ordinal")
+
+print("Model Green Krippendorff's Alpha - Validation Set")
+krippalpha(men_test_wu, metric = "ordinal")
+krippalpha(abn_test_wu, metric = "ordinal")
+krippalpha(acl_test_wu, metric = "ordinal")
+
+
+
