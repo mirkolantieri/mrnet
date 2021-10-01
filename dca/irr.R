@@ -1,0 +1,17 @@
+#install.packages("irr")
+library(irr)
+
+
+# Complex Model AUC
+men_lab <- read.csv2('./results (model auc)/Complex/complex-meniscus-label.csv', sep = ',')
+men_pred <- read.csv2('./results (model auc)/Complex/complex-meniscus-prediction.csv', sep = ',')
+
+abn_lab <- read.csv2('./results (model auc)/Complex/complex-abnormal-label.csv', sep = ',')
+abn_pred <- read.csv2('./results (model auc)/Complex/complex-abnormal-prediction.csv', sep = ',')
+
+acl_lab <- read.csv2('./results (model auc)/Complex/complex-acl-label.csv', sep = ',')
+acl_pred <- read.csv2('./results (model auc)/Complex/complex-acl-prediction.csv', sep = ',')
+
+men <- merge(men_lab, men_pred, by="Case", all=TRUE)
+ratings <- select(men$Score.x, men$Score.y)
+
