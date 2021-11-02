@@ -129,7 +129,7 @@ class Predictor:
             # Fit the model
             self.logreg.fit(X_train, y_train)
             probas = self.logreg.predict_proba(X_test)[:,1]
-            probas = (probas>0.5).astyoe(np.float32)
+            probas = (probas>0.5).astype(np.float32)
 
             # Calculate the AUC-score and Weighted Utility
             auc = metrics.roc_auc_score(y_train, probas)
